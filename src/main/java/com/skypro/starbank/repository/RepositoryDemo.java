@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @org.springframework.stereotype.Repository
-public class Repository {
+public class RepositoryDemo {
     private final JdbcTemplate jdbcTemplate;
 
-    public Repository(@Qualifier("recommendationsJdbcTemplate") JdbcTemplate jdbcTemplate) {
+    public RepositoryDemo(@Qualifier("recommendationsJdbcTemplate") JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
