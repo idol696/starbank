@@ -1,4 +1,4 @@
-package com.skypro.starbank.model;
+package com.skypro.starbank.model.rules;
 
 import java.util.List;
 

@@ -3,8 +3,9 @@ package com.skypro.starbank.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skypro.starbank.model.Product;
-import com.skypro.starbank.model.Rule;
-import com.skypro.starbank.model.RuleSet;
+import com.skypro.starbank.model.rules.Rule;
+import com.skypro.starbank.model.rules.RuleSet;
+import com.skypro.starbank.model.rules.RuleSetWrapper;
 import com.skypro.starbank.repository.ProductRepository;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
@@ -28,18 +29,19 @@ public class RuleServiceImpl implements RuleService {
         loadRules();
     }
 
-    // Загружаем правила из файла
     private void loadRules() {
         try {
             File file = new File(RULES_FILE);
             if (file.exists()) {
-                List<RuleSet> ruleSets = objectMapper.readValue(file, new TypeReference<>() {});
-                ruleSets.forEach(set -> rulesMap.put(set.getProductId(), set.getConditions()));
+                ObjectMapper objectMapper = new ObjectMapper();
+                RuleSetWrapper wrapper = objectMapper.readValue(file, RuleSetWrapper.class);
+                wrapper.getRules().forEach(set -> rulesMap.put(set.getProductId(), set.getConditions()));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Ошибка загрузки правил: " + e.getMessage());
+            throw new RuntimeException("Ошибка загрузки правил: " + e.getMessage(), e);
         }
     }
+
 
      public List<Product> getRecommendations(String userId) {
         return productRepository.findAllProducts().stream()
