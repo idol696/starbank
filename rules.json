@@ -1,0 +1,25 @@
+{
+  "rules": [
+    {
+      "productId": "147f6a0f-3b91-413b-ab99-87f081d60d5a",
+      "conditions": [
+        { "type": "HAS_PRODUCT", "productType": "DEBIT", "negate": false },
+        { "type": "HAS_PRODUCT", "productType": "INVEST", "negate": true },
+        { "type": "SUM_DEPOSIT", "productType": "SAVING", "operator": ">", "value": 1000 }
+      ]
+    },
+    {
+      "productId": "59efc529-2fff-41af-baff-90ccd7402925",
+      "conditions": [
+        { "type": "HAS_PRODUCT", "productType": "DEBIT", "negate": false },
+        {
+          "type": "OR",
+          "conditions": [
+            { "type": "SUM_DEPOSIT", "productType": "DEBIT", "operator": ">=", "value": 50000 },
+            { "type": "SUM_DEPOSIT", "productType": "SAVING", "operator": ">=", "value": 50000 }
+          ]
+        }
+      ]
+    }
+  ]
+}

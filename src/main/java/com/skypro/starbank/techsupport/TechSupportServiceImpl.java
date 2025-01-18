@@ -1,13 +1,13 @@
 package com.skypro.starbank.techsupport;
 
-import com.skypro.starbank.repository.Repository;
+import com.skypro.starbank.repository.RepositoryDemo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TechSupportServiceImpl implements TechSupportService {
     @Autowired
-    Repository testRepository;
+    RepositoryDemo testRepository;
 
     @Override
     public int test() {
