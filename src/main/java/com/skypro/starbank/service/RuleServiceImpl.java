@@ -31,7 +31,7 @@ public class RuleServiceImpl implements RuleService {
                 wrapper.getRules().forEach(set -> rulesMap.put(set.getProductId(), set.getConditions()));
             }
         } catch (IOException e) {
-            System.err.println("Ошибка загрузки правил: " + e.getMessage());
+            System.err.println("❌ Ошибка загрузки правил: " + e.getMessage());
         }
     }
 
@@ -47,6 +47,23 @@ public class RuleServiceImpl implements RuleService {
         rulesMap.clear();
         newRules.forEach(set -> rulesMap.put(set.getProductId(), set.getConditions()));
         saveRulesAsync();
+    }
+
+    @Override
+    public RuleSet getRulesByProductId(String productId) {
+        List<Rule> conditions = rulesMap.get(productId);
+        return (conditions != null) ? new RuleSet(productId, conditions) : null;
+    }
+
+    // Обновление правил для конкретного продукта
+    @Override
+    public void updateRulesForProduct(String productId, List<Rule> newConditions) {
+        if (rulesMap.containsKey(productId)) {
+            rulesMap.put(productId, newConditions);
+            saveRulesAsync();
+        } else {
+            throw new RuntimeException("❌ Ошибка: Продукт с ID " + productId + " не найден.");
+        }
     }
 
     @Async
