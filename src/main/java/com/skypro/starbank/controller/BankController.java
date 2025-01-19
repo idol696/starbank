@@ -1,16 +1,11 @@
 package com.skypro.starbank.controller;
 
-import com.skypro.starbank.model.Product;
-import com.skypro.starbank.model.Transaction;
-import com.skypro.starbank.model.User;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.service.RuleService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +16,13 @@ import java.util.List;
 /**
  * Контроллер для управления правилами.
  */
-@Tag(name = "Правила", description = "API для работы с правилами")
+@Tag(name = "Bank Controller", description = "API для управления банками")
 @RestController
-@RequestMapping("/rules")
-public class RuleController {
+@RequestMapping("/bank")
+public class BankController {
     private final RuleService ruleService;
 
-    public RuleController(RuleService ruleService) {
+    public BankController(RuleService ruleService) {
         this.ruleService = ruleService;
     }
 
