@@ -31,6 +31,7 @@ public class RuleController {
         this.ruleService = ruleService;
     }
 
+
     /**
      * Получить все правила.
      *
@@ -186,3 +187,4 @@ public class RuleController {
 //    }
 
 }
+
