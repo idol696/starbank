@@ -3,12 +3,12 @@ package com.skypro.starbank.model;
 import java.sql.Timestamp;
 
 public class Transaction {
-    private String id;
-    private User user;
-    private Product product;
-    private double amount;
-    private String type;
-    private Timestamp date;
+    private final String id;
+    private final User user;
+    private final Product product;
+    private final double amount;
+    private final String type;
+    private final Timestamp date;
 
     public Transaction(String id, User user, Product product, double amount, String type, Timestamp date) {
         this.id = id;
