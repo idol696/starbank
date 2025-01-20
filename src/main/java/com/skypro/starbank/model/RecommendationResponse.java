@@ -1,6 +1,7 @@
 package com.skypro.starbank.model;
 
 import java.util.List;
+import java.util.Objects;
 
 public class RecommendationResponse {
     private String userId;
@@ -25,5 +26,18 @@ public class RecommendationResponse {
 
     public void setRecommendations(List<Recommendation> recommendations) {
         this.recommendations = recommendations;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RecommendationResponse that = (RecommendationResponse) o;
+        return Objects.equals(getUserId(), that.getUserId()) && Objects.equals(getRecommendations(), that.getRecommendations());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUserId(), getRecommendations());
     }
 }

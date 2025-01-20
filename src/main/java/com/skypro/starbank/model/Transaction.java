@@ -1,6 +1,7 @@
 package com.skypro.starbank.model;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 public class Transaction {
     private final String id;
@@ -28,6 +29,19 @@ public class Transaction {
 
     public String getUserId() { return user.getId(); }
     public String getProductId() { return product.getId(); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return Double.compare(getAmount(), that.getAmount()) == 0 && Objects.equals(getId(), that.getId()) && Objects.equals(getUser(), that.getUser()) && Objects.equals(getProduct(), that.getProduct()) && Objects.equals(getType(), that.getType()) && Objects.equals(getDate(), that.getDate());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getUser(), getProduct(), getAmount(), getType(), getDate());
+    }
 }
 
 
