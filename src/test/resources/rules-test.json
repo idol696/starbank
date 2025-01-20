@@ -1,0 +1,27 @@
+{
+  "rules": [
+    {
+      "productId": "test-and-1",
+      "name": "AND Product",
+      "description": "Test product for AND condition",
+      "conditions": [
+        { "type": "HAS_PRODUCT", "productType": "DEBIT", "negate": false },
+        { "type": "SUM_DEPOSIT", "productType": "SAVING", "operator": ">", "value": 5000 }
+      ]
+    },
+    {
+      "productId": "test-or-1",
+      "name": "OR Product",
+      "description": "Test product for OR condition",
+      "conditions": [
+        {
+          "type": "OR",
+          "conditions": [
+            { "type": "HAS_PRODUCT", "productType": "CREDIT", "negate": true },
+            { "type": "SUM_EXPENSE", "productType": "DEBIT", "operator": ">", "value": 100000 }
+          ]
+        }
+      ]
+    }
+  ]
+}

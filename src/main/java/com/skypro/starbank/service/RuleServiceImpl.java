@@ -21,32 +21,45 @@ import java.util.stream.Collectors;
 @Service
 public class RuleServiceImpl implements RuleService {
     private static final Logger logger = LoggerFactory.getLogger(RuleServiceImpl.class);
-    private static final String RULES_FILE = "rules.json";
+    private static final String RULES_FILE = "./rules.json";
     private static final String TEMP_RULES_FILE = "rules_tmp.json";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ConcurrentHashMap<String, RuleSet> rulesMap = new ConcurrentHashMap<>();
     private final TransactionRepository transactionRepository;
+    private final String rulesFilePath;
+
+
+    public RuleServiceImpl(TransactionRepository transactionRepository, String rulesFilePath) {
+        this.transactionRepository = transactionRepository;
+        this.rulesFilePath = rulesFilePath;
+        loadRules();
+    }
 
     public RuleServiceImpl(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
+        this.rulesFilePath = RULES_FILE;
         loadRules();
     }
 
     private void loadRules() {
-        File file = new File(RULES_FILE);
+        File file = new File(rulesFilePath);
         if (file.exists()) {
             try {
                 RuleSetWrapper wrapper = objectMapper.readValue(file, RuleSetWrapper.class);
-                wrapper.getRules().forEach(set -> rulesMap.put(set.getProductId(), set));
-                logger.info("✅ Правила загружены из rules.json. Всего правил: {}", rulesMap.size());
+                wrapper.getRules().forEach(set -> {
+                    rulesMap.put(set.getProductId(), set);
+                    logger.debug("📌 Загружено правило: {}", set);
+                });
+                logger.info("✅ Правила загружены из {}. Всего правил: {}", rulesFilePath, rulesMap.size());
             } catch (IOException e) {
-                logger.error("❌ Ошибка загрузки правил: {}", e.getMessage());
+                logger.error("❌ Ошибка загрузки правил из {}: {}", rulesFilePath, e.getMessage());
             }
         } else {
-            logger.warn("⚠ Файл rules.json не найден. Используется пустой набор правил.");
+            logger.warn("⚠ Файл {} не найден. Используется пустой набор правил.", rulesFilePath);
         }
     }
+
 
     @Override
     public List<RuleSet> getAllRules() {
@@ -131,9 +144,21 @@ public class RuleServiceImpl implements RuleService {
                 yield result;
             }
             case "OR" -> {
-                boolean result = rule.getConditions() != null && rule.getConditions().stream()
-                        .anyMatch(subRule -> evaluateRule(userId, subRule));
+                if (rule.getConditions() == null || rule.getConditions().isEmpty()) {
+                    logger.warn("⚠ OR-условие для пользователя {} пусто!", userId);
+                    yield false;
+                }
+                boolean result = rule.getConditions().stream().anyMatch(subRule -> evaluateRule(userId, subRule));
                 logger.debug("✅ OR-условие: {} -> {}", rule.getConditions(), result);
+                yield result;
+            }
+            case "AND" -> {
+                if (rule.getConditions() == null || rule.getConditions().isEmpty()) {
+                    logger.warn("⚠ AND-условие для пользователя {} пусто!", userId);
+                    yield false;
+                }
+                boolean result = rule.getConditions().stream().allMatch(subRule -> evaluateRule(userId, subRule));
+                logger.debug("✅ AND-условие: {} -> {}", rule.getConditions(), result);
                 yield result;
             }
             default -> {
@@ -142,6 +167,7 @@ public class RuleServiceImpl implements RuleService {
             }
         };
     }
+
 
 
     private double getSafeValue(Rule rule) {
@@ -172,6 +198,8 @@ public class RuleServiceImpl implements RuleService {
             case ">=" -> actual >= value;
             case "<" -> actual < value;
             case "<=" -> actual <= value;
+            case "==" -> actual == value;
+            case "!=" -> actual != value;
             default -> false;
         };
         logger.debug("🔢 Сравнение: {} {} {} -> {}", actual, operator, value, result);

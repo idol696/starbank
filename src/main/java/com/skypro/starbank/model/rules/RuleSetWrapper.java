@@ -2,7 +2,6 @@ package com.skypro.starbank.model.rules;
 
 import java.util.List;
 
-// Класс для удобства заворота JSON в список "rules"
 public class RuleSetWrapper {
     private List<RuleSet> rules;
 
@@ -12,5 +11,12 @@ public class RuleSetWrapper {
 
     public void setRules(List<RuleSet> rules) {
         this.rules = rules;
+    }
+
+    @Override
+    public String toString() {
+        return "RuleSetWrapper{" +
+                "rules=" + rules +
+                '}';
     }
 }
