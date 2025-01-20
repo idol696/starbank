@@ -5,9 +5,13 @@ import com.skypro.starbank.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
 import java.util.List;
@@ -15,6 +19,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class RuleServiceTest {
 
@@ -89,4 +95,5 @@ class RuleServiceTest {
         verify(transactionRepository, times(1)).userHasProduct("test-user", "CREDIT");
         verify(transactionRepository, times(1)).getTotalExpenses("test-user", "DEBIT");
     }
+
 }

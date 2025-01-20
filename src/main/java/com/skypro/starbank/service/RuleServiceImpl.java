@@ -7,6 +7,8 @@ import com.skypro.starbank.model.rules.RuleSetWrapper;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Service
 public class RuleServiceImpl implements RuleService {
@@ -30,16 +31,15 @@ public class RuleServiceImpl implements RuleService {
     private final String rulesFilePath;
 
 
-    public RuleServiceImpl(TransactionRepository transactionRepository, String rulesFilePath) {
+    @Autowired
+    public RuleServiceImpl(TransactionRepository transactionRepository, @Value(RULES_FILE) String rulesFilePath) {
         this.transactionRepository = transactionRepository;
         this.rulesFilePath = rulesFilePath;
         loadRules();
     }
 
-    public RuleServiceImpl(TransactionRepository transactionRepository) {
-        this.transactionRepository = transactionRepository;
-        this.rulesFilePath = RULES_FILE;
-        loadRules();
+    public RuleServiceImpl() {
+        throw new UnsupportedOperationException("Используйте конструктор с параметрами!");
     }
 
     private void loadRules() {
@@ -138,9 +138,9 @@ public class RuleServiceImpl implements RuleService {
             }
             case "SUM_EXPENSE" -> {
                 double totalExpenses = getTotalExpenses(userId, rule.getProductType());
+                logger.debug("💸 SUM_EXPENSE для {}: тип={} сумма={}", userId, rule.getProductType(), totalExpenses);
                 boolean result = compare(totalExpenses, rule.getOperator(), getSafeValue(rule));
-                logger.debug("✅ SUM_EXPENSE {} -> {} {} {} -> {}",
-                        rule.getProductType(), totalExpenses, rule.getOperator(), rule.getValue(), result);
+                logger.debug("✅ SUM_EXPENSE {} -> {} {} {} -> {}", rule.getProductType(), totalExpenses, rule.getOperator(), rule.getValue(), result);
                 yield result;
             }
             case "OR" -> {
@@ -148,8 +148,13 @@ public class RuleServiceImpl implements RuleService {
                     logger.warn("⚠ OR-условие для пользователя {} пусто!", userId);
                     yield false;
                 }
-                boolean result = rule.getConditions().stream().anyMatch(subRule -> evaluateRule(userId, subRule));
-                logger.debug("✅ OR-условие: {} -> {}", rule.getConditions(), result);
+                logger.debug("🔎 Проверяем OR-условие: {}", rule.getConditions());
+                boolean result = rule.getConditions().stream().anyMatch(subRule -> {
+                    boolean subResult = evaluateRule(userId, subRule);
+                    logger.debug("✅ Подусловие OR: {} -> {}", subRule, subResult);
+                    return subResult;
+                });
+                logger.debug("✅ Итоговое OR: {} -> {}", rule.getConditions(), result);
                 yield result;
             }
             case "AND" -> {

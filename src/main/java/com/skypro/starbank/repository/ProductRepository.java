@@ -14,6 +14,7 @@ public class ProductRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    // оставлено для последующей переработки и доработки
     public List<Product> findAllProducts() {
         return jdbcTemplate.query("SELECT * FROM PRODUCTS",
                 (rs, rowNum) -> new Product(

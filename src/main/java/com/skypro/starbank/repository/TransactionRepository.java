@@ -12,6 +12,7 @@ import java.util.List;
 public class TransactionRepository {
     private final JdbcTemplate jdbcTemplate;
 
+    // схемы найдены в интернете у похожего проекта - проверили, работает
     public TransactionRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

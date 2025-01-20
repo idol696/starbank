@@ -17,7 +17,7 @@
         {
           "type": "OR",
           "conditions": [
-            { "type": "HAS_PRODUCT", "productType": "CREDIT", "negate": true },
+            { "type": "HAS_PRODUCT", "productType": "CREDIT", "negate": false },
             { "type": "SUM_EXPENSE", "productType": "DEBIT", "operator": ">", "value": 100000 }
           ]
         }

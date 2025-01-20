@@ -14,6 +14,7 @@ public class UserRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    // оставлено для последующей переработки и доработки
     public List<User> findAllUsers() {
         return jdbcTemplate.query("SELECT * FROM USERS",
                 (rs, rowNum) -> new User(rs.getString("id"), rs.getString("name")));
