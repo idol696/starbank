@@ -136,12 +136,6 @@ public class RuleServiceImpl implements RuleService {
                 logger.debug("✅ OR-условие: {} -> {}", rule.getConditions(), result);
                 yield result;
             }
-            case "AND" -> {
-                boolean result = rule.getConditions() != null && rule.getConditions().stream()
-                        .allMatch(subRule -> evaluateRule(userId, subRule));
-                logger.debug("✅ AND-условие: {} -> {}", rule.getConditions(), result);
-                yield result;
-            }
             default -> {
                 logger.warn("⚠ Неизвестное правило: {}", rule.getType());
                 yield false;
