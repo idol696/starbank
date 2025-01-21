@@ -27,7 +27,8 @@ public class Product {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return Objects.equals(getId(), product.getId()) && Objects.equals(getName(), product.getName()) && Objects.equals(getType(), product.getType()) && Objects.equals(getDescription(), product.getDescription());
+        return Objects.equals(getId(), product.getId()) && Objects.equals(getName(), product.getName())
+                && Objects.equals(getType(), product.getType()) && Objects.equals(getDescription(), product.getDescription());
     }
 
     @Override

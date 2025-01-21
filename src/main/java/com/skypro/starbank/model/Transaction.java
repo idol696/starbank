@@ -35,7 +35,9 @@ public class Transaction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
-        return Double.compare(getAmount(), that.getAmount()) == 0 && Objects.equals(getId(), that.getId()) && Objects.equals(getUser(), that.getUser()) && Objects.equals(getProduct(), that.getProduct()) && Objects.equals(getType(), that.getType()) && Objects.equals(getDate(), that.getDate());
+        return Double.compare(getAmount(), that.getAmount()) == 0 && Objects.equals(getId(),
+                that.getId()) && Objects.equals(getUser(), that.getUser()) && Objects.equals(getProduct(),
+                that.getProduct()) && Objects.equals(getType(), that.getType()) && Objects.equals(getDate(), that.getDate());
     }
 
     @Override
