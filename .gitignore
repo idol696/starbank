@@ -19,6 +19,7 @@ target/
 *.iml
 *.ipr
 .log
+*.trace.db
 
 ### NetBeans ###
 /nbproject/private/
