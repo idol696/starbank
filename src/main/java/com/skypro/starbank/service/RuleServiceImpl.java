@@ -9,13 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RuleServiceImpl implements RuleService {
     private static final Logger logger = LoggerFactory.getLogger(RuleServiceImpl.class);
     private static final String RULES_FILE = "./rules.json";
-    private static final String TEMP_RULES_FILE = "rules_tmp.json";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ConcurrentHashMap<String, RuleSet> rulesMap = new ConcurrentHashMap<>();
@@ -78,7 +74,7 @@ public class RuleServiceImpl implements RuleService {
         rulesMap.clear();
         newRules.forEach(set -> rulesMap.put(set.getProductId(), set));
         logger.info("🔄 Обновлены все правила. Новое количество: {}", rulesMap.size());
-        saveRulesAsync();
+        saveRules();
     }
 
     @Override
@@ -87,23 +83,20 @@ public class RuleServiceImpl implements RuleService {
         if (ruleSet != null) {
             ruleSet.setConditions(newConditions);
             logger.info("🔄 Обновлены правила для продукта ID: {}", productId);
-            saveRulesAsync();
+            saveRules();
         } else {
             logger.warn("⚠ Продукт с ID {} не найден. Обновление правил не выполнено.", productId);
         }
     }
 
-    @Async
-    public void saveRulesAsync() {
-        File tempFile = new File(TEMP_RULES_FILE);
+    public void saveRules() {
         File targetFile = new File(RULES_FILE);
 
         try {
             RuleSetWrapper wrapper = new RuleSetWrapper();
             wrapper.setRules(getAllRules());
 
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(tempFile, wrapper);
-            Files.move(tempFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(targetFile, wrapper);
 
             logger.info("✅ Правила успешно сохранены в rules.json.");
         } catch (IOException e) {
@@ -172,8 +165,6 @@ public class RuleServiceImpl implements RuleService {
             }
         };
     }
-
-
 
     private double getSafeValue(Rule rule) {
         return rule.getValue() != null ? rule.getValue() : 0.0;

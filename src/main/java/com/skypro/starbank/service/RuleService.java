@@ -35,7 +35,7 @@ public interface RuleService {
     /**
      * Асинхронное сохранение правил в файл.
      */
-    void saveRulesAsync();
+    void saveRules();
 
     /**
      * Проверка соответствия пользователя правилам продукта.
