@@ -34,7 +34,7 @@
 
  1. [Роман Кузьмин](https://github.com/idol696)
  2. [Алина Черемискина](https://github.com/linskay)
- 3. [Мария](https://github.com/goldovskaya-m)
+ 3. [Мария Голдовская](https://github.com/goldovskaya-m)
  4. [Варвара Калинина](https://github.com/varyansan)
     
  `пы.сы: тут должно быть общее фото`
