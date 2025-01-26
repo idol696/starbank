@@ -33,7 +33,7 @@
  # _Разработчики_ 
 
  1. [Роман Кузьмин](https://github.com/idol696)
- 2. [Алина](https://github.com/linskay)
+ 2. [Алина Черемискина](https://github.com/linskay)
  3. [Мария](https://github.com/goldovskaya-m)
  4. [Варвара Калинина](https://github.com/varyansan)
     
