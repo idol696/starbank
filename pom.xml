@@ -98,17 +98,10 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Liquibase -->
+		<!-- Liquibase Core-->
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
-		</dependency>
-
-		<!-- For using with Spring Boot -->
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-maven-plugin</artifactId>
-			<version>4.25.1</version>
 		</dependency>
 
 	</dependencies>

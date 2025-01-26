@@ -1,0 +1,51 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="1" author="linskay">
+        <createTable tableName="rule_sets">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="product_id" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="linskay">
+        <createTable tableName="rules">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="product_type" type="VARCHAR(255)"/>
+            <column name="negate" type="BOOLEAN"/>
+            <column name="operator" type="VARCHAR(255)"/>
+            <column name="value" type="DOUBLE"/>
+            <column name="compare_to" type="VARCHAR(255)"/>
+            <column name="compare_type" type="VARCHAR(255)"/>
+            <column name="parent_rule_id" type="BIGINT"/>
+            <column name="rule_set_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="3" author="linskay">
+        <addForeignKeyConstraint baseTableName="rules"
+                                 baseColumnNames="parent_rule_id"
+                                 constraintName="fk_rules_parent"
+                                 referencedTableName="rules"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="rules"
+                                 baseColumnNames="rule_set_id"
+                                 constraintName="fk_rules_rule_set"
+                                 referencedTableName="rule_sets"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

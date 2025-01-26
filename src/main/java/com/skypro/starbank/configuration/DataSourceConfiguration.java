@@ -1,10 +1,14 @@
 package com.skypro.starbank.configuration;
 
 import com.zaxxer.hikari.HikariDataSource;
+import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -17,7 +21,7 @@ public class DataSourceConfiguration {
         var dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(recommendationsUrl);
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setReadOnly(true);
+        dataSource.setReadOnly(true); // Устанавливаем режим только для чтения
         return dataSource;
     }
 
@@ -26,5 +30,20 @@ public class DataSourceConfiguration {
             @Qualifier("recommendationsDataSource") DataSource dataSource
     ) {
         return new JdbcTemplate(dataSource);
+    }
+
+    @Primary
+    @Bean(name = "defaultDataSource")
+    @ConfigurationProperties("spring.datasource")
+    public DataSource defaultDataSource(DataSourceProperties properties) {
+        return properties.initializeDataSourceBuilder().build();
+    }
+
+    @Bean
+    public SpringLiquibase liquibase(DataSource defaultDataSource) {
+        SpringLiquibase liquibase = new SpringLiquibase();
+        liquibase.setDataSource(defaultDataSource);
+        liquibase.setChangeLog("classpath:db/changelog/db.changelog-master.xml");
+        return liquibase;
     }
 }
