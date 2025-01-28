@@ -1,10 +1,11 @@
 package com.skypro.starbank.service;
-import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.model.rules.RuleSet;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface RuleService {
+
 
     /**
      * Получение всех правил.
@@ -23,19 +24,16 @@ public interface RuleService {
      * Полная замена всех правил.
      * @param newRules Новый список правил.
      */
-    void setRules(List<RuleSet> newRules);
+    RuleSet setRules(RuleSet newRules);
 
     /**
      * Обновление условий правил для конкретного продукта.
-     * @param productId UUID продукта.
+     *
+     * @param productId     UUID продукта.
      * @param newConditions Новый список условий.
      */
-    void updateRulesForProduct(String productId, List<Rule> newConditions);
+    void updateRulesForProduct(String productId, RuleSet newConditions);
 
-    /**
-     * Асинхронное сохранение правил в файл.
-     */
-    void saveRules();
 
     /**
      * Проверка соответствия пользователя правилам продукта.
@@ -44,4 +42,6 @@ public interface RuleService {
      * @return true, если пользователь соответствует правилам.
      */
     boolean checkRulesForUser(String userId, RuleSet ruleSet);
+
+    void deleteRuleSet(UUID id);
 }

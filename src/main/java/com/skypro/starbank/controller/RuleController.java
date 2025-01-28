@@ -2,6 +2,7 @@ package com.skypro.starbank.controller;
 
 import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.model.rules.RuleSet;
+import com.skypro.starbank.model.rules.RuleSetWrapper;
 import com.skypro.starbank.service.RuleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,7 +54,7 @@ public class RuleController {
     public ResponseEntity<RuleSet> createRule(
             @Parameter(description = "Набор правил для создания", required = true)
             @RequestBody RuleSet ruleSet) {
-        ruleService.setRules(List.of(ruleSet));
+        ruleService.setRules(ruleSet);
         return ResponseEntity.ok(ruleSet);
     }
 
@@ -66,27 +67,12 @@ public class RuleController {
     @Operation(summary = "Получить все наборы правил.", description = "Возвращает список всех наборов правил.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список наборов правил успешно получен",
-                    content = @Content(schema = @Schema(implementation = Map.class)))
+                    content = @Content(schema = @Schema(implementation = RuleSetWrapper.class)))
     })
-    public ResponseEntity<Map<String, List<Map<String, Object>>>> getAllRules() {
+    public ResponseEntity<RuleSetWrapper> getAllRules() {
         List<RuleSet> rules = ruleService.getAllRules();
 
-        List<Map<String, Object>> ruleResponses = rules.stream()
-                .map(ruleSet -> {
-                    Map<String, Object> ruleMap = new HashMap<>();
-                    ruleMap.put("id", ruleSet.getId());
-                    ruleMap.put("product_name", ruleSet.getName());
-                    ruleMap.put("product_id", ruleSet.getProductId());
-                    ruleMap.put("product_text", ruleSet.getDescription());
-                    ruleMap.put("rule", ruleSet.getConditions());
-                    return ruleMap;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, List<Map<String, Object>>> response = new HashMap<>();
-        response.put("data", ruleResponses);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new RuleSetWrapper(rules));
     }
 
     /**
@@ -130,7 +116,7 @@ public class RuleController {
             @Parameter(description = "ID продукта", required = true)
             @PathVariable String productId,
             @Parameter(description = "Новый список условий", required = true)
-            @RequestBody List<Rule> newConditions) {
+            @RequestBody RuleSet newConditions) {
         ruleService.updateRulesForProduct(productId, newConditions);
         return ResponseEntity.ok().build();
     }

@@ -1,173 +1,156 @@
 package com.skypro.starbank.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.model.rules.RuleSet;
-import com.skypro.starbank.model.rules.RuleSetWrapper;
+import com.skypro.starbank.repository.RuleSetRepository;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class RuleServiceImpl implements RuleService {
     private static final Logger logger = LoggerFactory.getLogger(RuleServiceImpl.class);
-    private static final String RULES_FILE = "./rules.json";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ConcurrentHashMap<String, RuleSet> rulesMap = new ConcurrentHashMap<>();
+    private final RuleSetRepository ruleSetRepository;
     private final TransactionRepository transactionRepository;
-    private final String rulesFilePath;
 
-
-    @Autowired
-    public RuleServiceImpl(TransactionRepository transactionRepository, @Value(RULES_FILE) String rulesFilePath) {
+    public RuleServiceImpl(RuleSetRepository ruleSetRepository, TransactionRepository transactionRepository) {
+        this.ruleSetRepository = ruleSetRepository;
         this.transactionRepository = transactionRepository;
-        this.rulesFilePath = rulesFilePath;
-        loadRules();
     }
 
-    public RuleServiceImpl() {
-        throw new UnsupportedOperationException("Используйте конструктор с параметрами!");
-    }
-
-    private void loadRules() {
-        File file = new File(rulesFilePath);
-        if (file.exists()) {
-            try {
-                RuleSetWrapper wrapper = objectMapper.readValue(file, RuleSetWrapper.class);
-                wrapper.getRules().forEach(set -> {
-                    rulesMap.put(set.getProductId(), set);
-                    logger.debug("📌 Загружено правило: {}", set);
-                });
-                logger.info("✅ Правила загружены из {}. Всего правил: {}", rulesFilePath, rulesMap.size());
-            } catch (IOException e) {
-                logger.error("❌ Ошибка загрузки правил из {}: {}", rulesFilePath, e.getMessage());
-            }
-        } else {
-            logger.warn("⚠ Файл {} не найден. Используется пустой набор правил.", rulesFilePath);
-        }
-    }
-
-
+    /**
+     * Получение всех правил из базы
+     */
     @Override
     public List<RuleSet> getAllRules() {
-        logger.debug("📌 Получение всех правил. Количество: {}", rulesMap.size());
-        return List.copyOf(rulesMap.values());
+        return ruleSetRepository.findAll();
     }
 
+    /**
+     * Получение конкретного набора правил по ID
+     */
     @Override
-    public RuleSet getRulesByProductId(String productId) {
-        logger.debug("📌 Получение правил для продукта ID: {}", productId);
-        return rulesMap.get(productId);
+    public RuleSet getRulesByProductId(String id) {
+        return getRuleSetById(UUID.fromString(id)).orElse(new RuleSet());
     }
 
-    @Override
-    public void setRules(List<RuleSet> newRules) {
-        rulesMap.clear();
-        newRules.forEach(set -> rulesMap.put(set.getProductId(), set));
-        logger.info("🔄 Обновлены все правила. Новое количество: {}", rulesMap.size());
-        saveRules();
+
+    private Optional<RuleSet> getRuleSetById(UUID id) {
+        return ruleSetRepository.findById(id);
     }
 
+
+    /**
+     * Создание нового набора правил
+     */
     @Override
-    public void updateRulesForProduct(String productId, List<Rule> newConditions) {
-        RuleSet ruleSet = rulesMap.get(productId);
-        if (ruleSet != null) {
-            ruleSet.setConditions(newConditions);
-            logger.info("🔄 Обновлены правила для продукта ID: {}", productId);
-            saveRules();
-        } else {
-            logger.warn("⚠ Продукт с ID {} не найден. Обновление правил не выполнено.", productId);
+    @Transactional
+    public RuleSet setRules(RuleSet ruleSet) {
+        if (ruleSet == null) {
+            throw new IllegalArgumentException("Получен пустой JSON");
         }
-    }
-
-    public void saveRules() {
-        File targetFile = new File(RULES_FILE);
-
-        try {
-            RuleSetWrapper wrapper = new RuleSetWrapper();
-            wrapper.setRules(getAllRules());
-
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(targetFile, wrapper);
-
-            logger.info("✅ Правила успешно сохранены в rules.json.");
-        } catch (IOException e) {
-            logger.error("❌ Ошибка сохранения правил: {}", e.getMessage());
+        // Данный блок - защита от бага Hibernate + Liquibase, касающийся авто-инкремента
+        if (ruleSet.getRules() != null) {
+            for (Rule rule : ruleSet.getRules()) {
+                rule.setRuleSet(ruleSet);
+                rule.setId(null);
+                logger.info("Rule ID: {} -> RuleSet ID: {}", rule.getId(), ruleSet.getId());
+            }
         }
+        logger.info("Создан RuleSet: {}", ruleSet);
+
+        return ruleSetRepository.save(ruleSet);
     }
 
+    /**
+     * Обновление существующего набора правил
+     */
+    @Override
+    @Transactional
+    public void updateRulesForProduct(String id, RuleSet updatedRuleSet) {
+        ruleSetRepository.findById(UUID.fromString(id)).map(existingRuleSet -> {
+            existingRuleSet.setProductId(updatedRuleSet.getProductId());
+            existingRuleSet.setProductName(updatedRuleSet.getProductName());
+            existingRuleSet.setProductText(updatedRuleSet.getProductText());
+            existingRuleSet.setRules(updatedRuleSet.getRules());
+            return ruleSetRepository.save(existingRuleSet);
+        }).orElseThrow(() -> new RuntimeException("Набор правил с ID " + id + " не найден"));
+    }
+
+    /**
+     * Удаление набора правил по ID
+     */
+    @Override
+    @Transactional
+    public void deleteRuleSet(UUID id) {
+        ruleSetRepository.findByProductId(id).ifPresent(ruleSetRepository::delete);
+    }
+
+    /**
+     * Проверка выполнения правил для пользователя
+     */
     @Override
     public boolean checkRulesForUser(String userId, RuleSet ruleSet) {
         logger.debug("🔍 Проверка правил для пользователя {} по продукту {}", userId, ruleSet.getProductId());
-        boolean result = ruleSet.getConditions().stream().allMatch(rule -> evaluateRule(userId, rule));
+        boolean result = ruleSet.getRules().stream().allMatch(rule -> evaluateRule(userId, rule));
         logger.debug("🎯 Результат проверки правил для пользователя {}: {}", userId, result);
         return result;
     }
 
+    /**
+     * Выполнение отдельного правила
+     */
     private boolean evaluateRule(String userId, Rule rule) {
-        logger.debug("🔎 Проверка условия: {} для пользователя {} (Тип: {}, Значение: {})",
-                rule.getType(), userId, rule.getProductType(), rule.getValue());
+        logger.debug("🔎 Проверка условия: {} для пользователя {} (Аргументы: {})",
+                rule.getQuery(), userId, rule.getArguments());
 
-        return switch (rule.getType()) {
-            case "HAS_PRODUCT" -> {
-                boolean result = hasProduct(userId, rule.getProductType()) != rule.isNegate();
-                logger.debug("✅ HAS_PRODUCT {} -> {}", rule.getProductType(), result);
+        return switch (rule.getQuery()) {
+            case "ACTIVE_USER_OF" -> {
+                String productType = rule.getArgument(0);
+                boolean result = hasProductActive(userId, productType) != rule.isNegate();
+                logger.debug("✅ ACTIVE_USER_OF {} -> {}", productType, result);
                 yield result;
             }
-            case "SUM_DEPOSIT" -> {
-                double totalDeposits = getTotalDeposits(userId, rule.getProductType());
-                boolean result = compare(totalDeposits, rule.getOperator(), getSafeValue(rule));
-                logger.debug("✅ SUM_DEPOSIT {} -> {} {} {} -> {}",
-                        rule.getProductType(), totalDeposits, rule.getOperator(), rule.getValue(), result);
+            case "USER_OF" -> {
+                String productType = rule.getArgument(0);
+                boolean result = hasProduct(userId, productType) != rule.isNegate();
+                logger.debug("✅ USER_OF {} -> {}", productType, result);
                 yield result;
             }
-            case "SUM_EXPENSE" -> {
-                double totalExpenses = getTotalExpenses(userId, rule.getProductType());
-                logger.debug("💸 SUM_EXPENSE для {}: тип={} сумма={}", userId, rule.getProductType(), totalExpenses);
-                boolean result = compare(totalExpenses, rule.getOperator(), getSafeValue(rule));
-                logger.debug("✅ SUM_EXPENSE {} -> {} {} {} -> {}", rule.getProductType(), totalExpenses, rule.getOperator(), rule.getValue(), result);
+            case "TRANSACTION_SUM_COMPARE" -> {
+                String productType = rule.getArgument(0);
+                String transactionType = rule.getArgument(1);
+                String operator = rule.getArgument(2);
+                double value = Double.parseDouble(rule.getArgument(3));
+
+                double total = getTotalAmount(userId, productType, transactionType);
+                boolean result = compare(total, operator, value);
+                logger.debug("✅ TRANSACTION_SUM_COMPARE {} -> {} {} {} -> {}", productType, total, operator, value, result);
                 yield result;
             }
-            case "OR" -> {
-                if (rule.getConditions() == null || rule.getConditions().isEmpty()) {
-                    logger.warn("⚠ OR-условие для пользователя {} пусто!", userId);
-                    yield false;
-                }
-                logger.debug("🔎 Проверяем OR-условие: {}", rule.getConditions());
-                boolean result = rule.getConditions().stream().anyMatch(subRule -> {
-                    boolean subResult = evaluateRule(userId, subRule);
-                    logger.debug("✅ Подусловие OR: {} -> {}", subRule, subResult);
-                    return subResult;
-                });
-                logger.debug("✅ Итоговое OR: {} -> {}", rule.getConditions(), result);
-                yield result;
-            }
-            case "AND" -> {
-                if (rule.getConditions() == null || rule.getConditions().isEmpty()) {
-                    logger.warn("⚠ AND-условие для пользователя {} пусто!", userId);
-                    yield false;
-                }
-                boolean result = rule.getConditions().stream().allMatch(subRule -> evaluateRule(userId, subRule));
-                logger.debug("✅ AND-условие: {} -> {}", rule.getConditions(), result);
+            case "TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW" -> {
+                String productType = rule.getArgument(0);
+                String operator = rule.getArgument(1);
+
+                double totalDeposits = getTotalAmount(userId, productType, "DEPOSIT");
+                double totalWithdrawals = getTotalAmount(userId, productType, "EXPENSE");
+
+                boolean result = compare(totalDeposits, operator, totalWithdrawals);
+                logger.debug("✅ TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW {} -> {} {} {} -> {}", productType, totalDeposits, operator, totalWithdrawals, result);
                 yield result;
             }
             default -> {
-                logger.warn("⚠ Неизвестное правило: {}", rule.getType());
+                logger.warn("⚠ Неизвестное правило: {}", rule.getQuery());
                 yield false;
             }
         };
-    }
-
-    private double getSafeValue(Rule rule) {
-        return rule.getValue() != null ? rule.getValue() : 0.0;
     }
 
     private boolean hasProduct(String userId, String productType) {
@@ -176,15 +159,17 @@ public class RuleServiceImpl implements RuleService {
         return result;
     }
 
-    private double getTotalDeposits(String userId, String productType) {
-        double total = transactionRepository.getTotalDeposits(userId, productType);
-        logger.debug("💰 Общая сумма пополнений {} для пользователя {}: {}", productType, userId, total);
-        return total;
+    private boolean hasProductActive(String userId, String productType) {
+        boolean result = transactionRepository.userHasProductCount(userId, productType) >=5;
+        logger.debug("📊 Пользователь активного продукта {} {} активный продукт {}", userId, result , productType);
+        return result;
     }
 
-    private double getTotalExpenses(String userId, String productType) {
-        double total = transactionRepository.getTotalExpenses(userId, productType);
-        logger.debug("💸 Общая сумма трат {} для пользователя {}: {}", productType, userId, total);
+    private double getTotalAmount(String userId, String productType, String transactionType) {
+        double total = transactionType.equals("DEPOSIT")
+                ? transactionRepository.getTotalDeposits(userId, productType)
+                : transactionRepository.getTotalExpenses(userId, productType);
+        logger.debug("💰 Общая сумма {} {} для пользователя {}: {}", transactionType, productType, userId, total);
         return total;
     }
 

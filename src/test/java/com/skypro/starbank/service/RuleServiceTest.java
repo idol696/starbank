@@ -36,7 +36,7 @@ class RuleServiceTest {
         assertNotNull(rulesFile, "⚠ Файл rules-test.json не найден в test/resources!");
 
         // Создаём RuleService вручную, передавая путь к `rules-test.json`
-        ruleService = new RuleServiceImpl(transactionRepository, rulesFile.getAbsolutePath());
+       // ruleService = new RuleServiceImpl(transactionRepository, rulesFile.getAbsolutePath());
     }
 
     private File getRulesTestFile() {
@@ -59,7 +59,7 @@ class RuleServiceTest {
     void shouldReturnRuleSetForExistingProduct() {
         RuleSet ruleSet = ruleService.getRulesByProductId("test-and-1");
         assertNotNull(ruleSet);
-        assertEquals("AND Product", ruleSet.getName());
+        assertEquals("AND Product", ruleSet.getProductName());
     }
 
     @Test

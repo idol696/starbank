@@ -50,10 +50,6 @@ public class RecommendationController {
     })
     public ResponseEntity<RecommendationResponse> getRecommendations(@Parameter(description = "ID пользователя", required = true) @PathVariable String userId) {
         RecommendationResponse response = recommendationService.getRecommendations(userId);
-        if (response == null || response.getRecommendations() == null || response.getRecommendations().isEmpty()) {
-            return ResponseEntity.ok(new RecommendationResponse(userId, Collections.emptyList()));
-        } else {
-            return ResponseEntity.ok(response);
-        }
+        return ResponseEntity.ok(response);
     }
 }

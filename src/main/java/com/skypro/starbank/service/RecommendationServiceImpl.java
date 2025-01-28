@@ -23,7 +23,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         List<Recommendation> recommendations = allRules.stream()
                 .filter(ruleSet -> ruleService.checkRulesForUser(userId, ruleSet))
-                .map(ruleSet -> new Recommendation(ruleSet.getName(), ruleSet.getProductId(), ruleSet.getDescription()))
+                .map(ruleSet -> new Recommendation(ruleSet.getProductName(), ruleSet.getProductId().toString(), ruleSet.getProductText()))
                 .toList();
 
         logger.info("🔹 Пользователь {} получил {} рекомендаций.", userId, recommendations.size());

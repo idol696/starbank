@@ -1,186 +1,90 @@
 package com.skypro.starbank.model.rules;
 
+import com.fasterxml.jackson.annotation.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-/**
- * Представляет набор правил для определенного продукта.
- * <p>
- * Набор правил включает в себя идентификатор продукта, имя, описание
- * и список правил, которые применяются к продукту.
- * </p>
- */
 @Entity
 @Table(name = "rule_sets")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder({"product_name","product_id","product_text","rules"})
+@Schema(description = "RuleSet entity representing a product's rules")
 public class RuleSet {
 
-    /**
-     * Уникальный идентификатор набора правил.
-     */
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique ID of the rule set", example = "1")
     private Long id;
 
-    /**
-     * Идентификатор продукта, для которого предназначен данный набор правил.
-     */
-    @Column(name = "product_id")
-    private String productId;
+    @Column(name = "product_id", nullable = false, unique = true, columnDefinition = "UUID")
+    @Schema(description = "Product ID (UUID)", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty("product_id")
+    private UUID productId;
 
-    /**
-     * Имя набора правил.
-     */
-    @Column(name = "name")
-    private String name;
+    @Column(name = "product_name", nullable = false)
+    @Schema(description = "Product Name", example = "Invest 500")
+    @JsonProperty("product_name")
+    private String productName;
 
-    /**
-     * Описание набора правил.
-     */
-    @Column(name = "description")
-    private String description;
+    @Column(name = "product_text", columnDefinition = "TEXT")
+    @Schema(description = "Product Description", example = "Investment details...")
+    @JsonProperty("product_text")
+    private String productText;
 
-    /**
-     * Список правил, входящих в данный набор правил.
-     */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_set_id")
-    private List<Rule> conditions;
+    @JsonProperty("rules")
+    private List<Rule> rules;
 
+    public RuleSet() {}
 
-    /**
-     * Конструктор без аргументов, необходимый для JPA.
-     */
-    public RuleSet() {
-    }
-
-    /**
-     * Конструктор для создания набора правил с указанными параметрами.
-     *
-     * @param productId   Идентификатор продукта.
-     * @param name        Имя набора правил.
-     * @param description Описание набора правил.
-     * @param conditions  Список правил.
-     */
-    public RuleSet(String productId, String name, String description, List<Rule> conditions) {
+    public RuleSet(UUID productId, String productName, String productText, List<Rule> rules) {
         this.productId = productId;
-        this.name = name;
-        this.description = description;
-        this.conditions = conditions;
+        this.productName = productName;
+        this.productText = productText;
+        this.rules = rules;
     }
 
-    /**
-     * Возвращает уникальный идентификатор набора правил.
-     *
-     * @return Идентификатор набора правил.
-     */
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    /**
-     * Устанавливает уникальный идентификатор набора правил.
-     *
-     * @param id Идентификатор набора правил.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public UUID getProductId() { return productId; }
+    public void setProductId(UUID productId) { this.productId = productId; }
 
-    /**
-     * Возвращает идентификатор продукта, для которого предназначен данный набор правил.
-     *
-     * @return Идентификатор продукта.
-     */
-    public String getProductId() {
-        return productId;
-    }
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 
-    /**
-     * Устанавливает идентификатор продукта.
-     *
-     * @param productId Идентификатор продукта.
-     */
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
+    public String getProductText() { return productText; }
+    public void setProductText(String productText) { this.productText = productText; }
 
-    /**
-     * Возвращает имя набора правил.
-     *
-     * @return Имя набора правил.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Устанавливает имя набора правил.
-     *
-     * @param name Имя набора правил.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Возвращает описание набора правил.
-     *
-     * @return Описание набора правил.
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Устанавливает описание набора правил.
-     *
-     * @param description Описание набора правил.
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Возвращает список правил, входящих в данный набор правил.
-     *
-     * @return Список правил.
-     */
-    public List<Rule> getConditions() {
-        return conditions;
-    }
-
-    /**
-     * Устанавливает список правил.
-     *
-     * @param conditions Список правил.
-     */
-    public void setConditions(List<Rule> conditions) {
-        this.conditions = conditions;
-    }
+    public List<Rule> getRules() { return rules; }
+    public void setRules(List<Rule> rules) { this.rules = rules; }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RuleSet ruleSet = (RuleSet) o;
-        return Objects.equals(id, ruleSet.id);
+        return Objects.equals(id, ruleSet.id) && Objects.equals(productId, ruleSet.productId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, productId);
     }
 
     @Override
     public String toString() {
         return "RuleSet{" +
                 "id=" + id +
-                ", productId='" + productId + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", conditions=" + conditions +
+                ", productId=" + productId +
+                ", productName='" + productName + '\'' +
+                ", productText='" + productText + '\'' +
+                ", rules=" + rules +
                 '}';
     }
 }
