@@ -2,7 +2,6 @@ package com.skypro.starbank.service;
 import com.skypro.starbank.model.rules.RuleSet;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface RuleService {
 
