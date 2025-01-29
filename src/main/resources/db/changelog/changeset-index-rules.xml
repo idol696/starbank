@@ -33,15 +33,9 @@
     </changeSet>
 
     <changeSet id="reset-sequence-rule-sets" author="idol696">
-        <sql>
-            SELECT setval(pg_get_serial_sequence('rule_sets', 'id'), 4, false);
-        </sql>
-    </changeSet>
 
-    <changeSet id="reset-sequence-rules" author="idol696">
-        <sql>
-            SELECT setval(pg_get_serial_sequence('rules', 'id'), 12, false);
-        </sql>
+        <createSequence sequenceName="rule_sets" startValue="1" incrementBy="4"/>
+        <createSequence sequenceName="rules" startValue="1" incrementBy="12"/>
     </changeSet>
 
 </databaseChangeLog>

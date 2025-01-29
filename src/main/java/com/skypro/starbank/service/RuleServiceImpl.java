@@ -43,7 +43,7 @@ public class RuleServiceImpl implements RuleService {
 
 
     private Optional<RuleSet> getRuleSetById(UUID id) {
-        return ruleSetRepository.findById(id);
+        return ruleSetRepository.findByProductId(id);
     }
 
 

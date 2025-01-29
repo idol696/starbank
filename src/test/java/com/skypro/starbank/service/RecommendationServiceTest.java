@@ -24,8 +24,8 @@ class RecommendationServiceTest {
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
 
-    private final String testUserId = "user-123";
-    private final RuleSet testRuleSet = new RuleSet(UUID.fromString("product-1"), "Invest 500", "Investment description", List.of());
+    private final String testUserId = "f37ba8a8-3cd5-4976-9f74-2b21f105da67";
+    private final RuleSet testRuleSet = new RuleSet(UUID.fromString(testUserId), "Invest 500", "Investment description", List.of());
 
     @BeforeEach
     void setUp() {

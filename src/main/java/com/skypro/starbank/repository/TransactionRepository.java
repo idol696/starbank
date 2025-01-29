@@ -74,7 +74,7 @@ public class TransactionRepository {
         String sql = """
                 SELECT COALESCE(SUM(t.amount), 0) FROM TRANSACTIONS t
                 JOIN PRODUCTS p ON t.product_id = p.id
-                WHERE t.user_id = ? AND p.type = ? AND t.type = 'EXPENSE'
+                WHERE t.user_id = ? AND p.type = ? AND t.type = 'WITHDRAW'
                 """;
 
         return jdbcTemplate.queryForObject(sql, new Object[]{userId, productType}, Double.class);
