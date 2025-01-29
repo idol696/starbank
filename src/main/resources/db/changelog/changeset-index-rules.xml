@@ -15,10 +15,6 @@
             <column name="product_name"/>
         </createIndex>
 
-        <createSequence sequenceName="rule_sets_seq" startValue="1" incrementBy="1"/>
-        <createSequence sequenceName="rules_seq" startValue="1" incrementBy="1"/>
-
-
 
     </changeSet>
 
@@ -32,10 +28,11 @@
                 onDelete="CASCADE"/>
     </changeSet>
 
-    <changeSet id="reset-sequence-rule-sets" author="idol696">
-
-        <createSequence sequenceName="rule_sets" startValue="1" incrementBy="4"/>
-        <createSequence sequenceName="rules" startValue="1" incrementBy="12"/>
+    <changeSet id="reset-sequence-rules" author="idol696">
+        <sql>
+            SELECT setval(pg_get_serial_sequence('rule_sets', 'id'), (SELECT MAX(id) FROM rules));
+            SELECT setval(pg_get_serial_sequence('rules', 'id'), (SELECT MAX(id) FROM rules));
+        </sql>
     </changeSet>
 
 </databaseChangeLog>

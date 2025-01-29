@@ -1,6 +1,7 @@
 package com.skypro.starbank.service;
 
 import com.skypro.starbank.model.rules.Rule;
+import com.skypro.starbank.model.rules.RuleQueryType;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.repository.RuleSetRepository;
 import com.skypro.starbank.repository.TransactionRepository;
@@ -15,6 +16,8 @@ import java.util.UUID;
 
 @Service
 public class RuleServiceImpl implements RuleService {
+
+
     private static final Logger logger = LoggerFactory.getLogger(RuleServiceImpl.class);
 
     private final RuleSetRepository ruleSetRepository;
@@ -46,7 +49,6 @@ public class RuleServiceImpl implements RuleService {
         return ruleSetRepository.findByProductId(id);
     }
 
-
     /**
      * Создание нового набора правил
      */
@@ -56,7 +58,7 @@ public class RuleServiceImpl implements RuleService {
         if (ruleSet == null) {
             throw new IllegalArgumentException("Получен пустой JSON");
         }
-        // Данный блок - защита от бага Hibernate + Liquibase, касающийся авто-инкремента
+        // Данный блок - защита от бага Hibernate + Liquibase, касающийся авто-инкремента (ПОТОМ УБРАТЬ (СТАДИЯ 3)!!!)
         if (ruleSet.getRules() != null) {
             for (Rule rule : ruleSet.getRules()) {
                 rule.setRuleSet(ruleSet);
@@ -74,8 +76,8 @@ public class RuleServiceImpl implements RuleService {
      */
     @Override
     @Transactional
-    public void updateRulesForProduct(String id, RuleSet updatedRuleSet) {
-        ruleSetRepository.findById(UUID.fromString(id)).map(existingRuleSet -> {
+    public void updateRulesForProduct(Long id, RuleSet updatedRuleSet) {
+        ruleSetRepository.findById(id).map(existingRuleSet -> {
             existingRuleSet.setProductId(updatedRuleSet.getProductId());
             existingRuleSet.setProductName(updatedRuleSet.getProductName());
             existingRuleSet.setProductText(updatedRuleSet.getProductText());
@@ -89,8 +91,8 @@ public class RuleServiceImpl implements RuleService {
      */
     @Override
     @Transactional
-    public void deleteRuleSet(UUID id) {
-        ruleSetRepository.findByProductId(id).ifPresent(ruleSetRepository::delete);
+    public void deleteRuleSet(Long id) {
+        ruleSetRepository.findById(id).ifPresent(ruleSetRepository::delete);
     }
 
     /**
@@ -108,23 +110,24 @@ public class RuleServiceImpl implements RuleService {
      * Выполнение отдельного правила
      */
     private boolean evaluateRule(String userId, Rule rule) {
+        RuleQueryType queryType = rule.getQuery();
         logger.debug("🔎 Проверка условия: {} для пользователя {} (Аргументы: {})",
                 rule.getQuery(), userId, rule.getArguments());
 
-        return switch (rule.getQuery()) {
-            case "ACTIVE_USER_OF" -> {
+        return switch (queryType) {
+            case ACTIVE_USER_OF -> {
                 String productType = rule.getArgument(0);
                 boolean result = hasProductActive(userId, productType) != rule.isNegate();
                 logger.debug("✅ ACTIVE_USER_OF {} -> {}", productType, result);
                 yield result;
             }
-            case "USER_OF" -> {
+            case USER_OF -> {
                 String productType = rule.getArgument(0);
                 boolean result = hasProduct(userId, productType) != rule.isNegate();
                 logger.debug("✅ USER_OF {} -> {}", productType, result);
                 yield result;
             }
-            case "TRANSACTION_SUM_COMPARE" -> {
+            case TRANSACTION_SUM_COMPARE -> {
                 String productType = rule.getArgument(0);
                 String transactionType = rule.getArgument(1);
                 String operator = rule.getArgument(2);
@@ -135,7 +138,7 @@ public class RuleServiceImpl implements RuleService {
                 logger.debug("✅ TRANSACTION_SUM_COMPARE {} -> {} {} {} -> {}", productType, total, operator, value, result);
                 yield result;
             }
-            case "TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW" -> {
+            case TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW -> {
                 String productType = rule.getArgument(0);
                 String operator = rule.getArgument(1);
 

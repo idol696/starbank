@@ -2,12 +2,15 @@ package com.skypro.starbank.model.rules;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skypro.starbank.exception.RulesArgumentIndexNotFoundException;
+import com.skypro.starbank.exception.RulesArgumentSerializationException;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,10 +28,12 @@ public class Rule {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_set_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private RuleSet ruleSet;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "query", nullable = false)
-    private String query;
+    private RuleQueryType query;
 
     @Column(name = "arguments", columnDefinition = "TEXT")
     private String argumentsJson;
@@ -41,7 +46,7 @@ public class Rule {
 
     public Rule() {}
 
-    public Rule(String query, List<String> arguments, boolean negate) {
+    public Rule(RuleQueryType query, List<String> arguments, boolean negate) {
         this.query = query;
         this.negate = negate;
         setArguments(arguments);
@@ -50,15 +55,15 @@ public class Rule {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getQuery() { return query; }
-    public void setQuery(String query) { this.query = query; }
+    public RuleQueryType getQuery() { return query; }
+    public void setQuery(RuleQueryType query) { this.query = query; }
 
     public boolean isNegate() { return negate; }
     public void setNegate(boolean negate) { this.negate = negate; }
 
     public String getArgument(int index) {
         if (getArguments().get(index).isEmpty()) {
-            throw new RuntimeException("Error index");
+            throw new RulesArgumentIndexNotFoundException();
         }
         return getArguments().get(index);
     }
@@ -67,7 +72,7 @@ public class Rule {
         try {
             return objectMapper.readValue(argumentsJson, new TypeReference<List<String>>() {});
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Ошибка десериализации arguments: " + argumentsJson, e);
+            throw new RulesArgumentSerializationException("Ошибка десериализации arguments: " + argumentsJson);
         }
     }
 
@@ -75,7 +80,7 @@ public class Rule {
         try {
             this.argumentsJson = objectMapper.writeValueAsString(arguments);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Ошибка сериализации arguments: " + arguments, e);
+            throw new RulesArgumentSerializationException("Ошибка сериализации arguments: " + arguments);
         }
     }
 

@@ -1,15 +1,14 @@
 package com.skypro.starbank.service;
 
 import com.skypro.starbank.model.rules.Rule;
+import com.skypro.starbank.model.rules.RuleQueryType;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.repository.RuleSetRepository;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -46,10 +45,10 @@ class RuleServiceTest {
         testProductId3 = UUID.randomUUID();
         testProductId4 = UUID.randomUUID();
         testUserId = UUID.fromString("f37ba8a8-3cd5-4976-9f74-2b21f105da67");
-        List<Rule> rulesList = List.of(new Rule("USER_OF",List.of("DEBIT"),false));
-        List<Rule> rulesList2 = List.of(rulesList.get(0),new Rule("TRANSACTION_SUM_COMPARE",List.of("DEBIT", "DEPOSIT", ">", "1000"),false));
-        List<Rule> rulesList3 = List.of(rulesList.get(0),new Rule("TRANSACTION_SUM_COMPARE",List.of("INVEST", "EXPENSE", ">", "1000"),false));
-        List<Rule> rulesList4 = List.of(rulesList.get(0),new Rule("TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW",List.of("DEBIT", ">"),false));
+        List<Rule> rulesList = List.of(new Rule(RuleQueryType.USER_OF,List.of("DEBIT"),false));
+        List<Rule> rulesList2 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE,List.of("DEBIT", "DEPOSIT", ">", "1000"),false));
+        List<Rule> rulesList3 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE,List.of("INVEST", "EXPENSE", ">", "1000"),false));
+        List<Rule> rulesList4 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW,List.of("DEBIT", ">"),false));
 
         RuleSet ruleSet1 = new RuleSet(testProductId1, "Test1", "Desc1", rulesList);
         RuleSet ruleSet2 = new RuleSet(testProductId2, "Test2", "Desc2", rulesList2);

@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface RuleSetRepository extends JpaRepository<RuleSet, UUID> {
+public interface RuleSetRepository extends JpaRepository<RuleSet, Long> {
     Optional<RuleSet> findByProductId(UUID productId);
 }
 

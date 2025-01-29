@@ -1,6 +1,5 @@
 package com.skypro.starbank.controller;
 
-import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.model.rules.RuleSetWrapper;
 import com.skypro.starbank.service.RuleService;
@@ -14,14 +13,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Контроллер для управления наборами правил (RuleSet).
  */
+
 @RestController
 @RequestMapping("/rule")
 @Tag(name = "Rule Controller", description = "API для управления наборами правил.")
@@ -75,53 +72,7 @@ public class RuleController {
         return ResponseEntity.ok(new RuleSetWrapper(rules));
     }
 
-    /**
-     * Получает набор правил по ID продукта.
-     *
-     * @param productId ID продукта.
-     * @return {@link ResponseEntity} с набором правил для указанного продукта.
-     */
-    @GetMapping("/product/{productId}")
-    @Operation(summary = "Получить набор правил по ID продукта.", description = "Возвращает набор правил для указанного продукта.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Набор правил успешно получен",
-                    content = @Content(schema = @Schema(implementation = RuleSet.class))),
-            @ApiResponse(responseCode = "404", description = "Набор правил для указанного продукта не найден")
-    })
-    public ResponseEntity<RuleSet> getRulesByProductId(
-            @Parameter(description = "ID продукта", required = true)
-            @PathVariable String productId) {
-        RuleSet ruleSet = ruleService.getRulesByProductId(productId);
-        if (ruleSet != null) {
-            return ResponseEntity.ok(ruleSet);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
-     * Обновляет набор правил для конкретного продукта.
-     *
-     * @param productId     ID продукта.
-     * @param newConditions Новый список условий.
-     * @return {@link ResponseEntity} с HTTP статусом 200 OK, если обновление прошло успешно.
-     */
-    @PutMapping("/product/{productId}")
-    @Operation(summary = "Обновить набор правил для продукта.", description = "Обновляет набор правил для указанного продукта.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Набор правил успешно обновлен"),
-            @ApiResponse(responseCode = "404", description = "Продукт с указанным ID не найден")
-    })
-    public ResponseEntity<Void> updateRulesForProduct(
-            @Parameter(description = "ID продукта", required = true)
-            @PathVariable String productId,
-            @Parameter(description = "Новый список условий", required = true)
-            @RequestBody RuleSet newConditions) {
-        ruleService.updateRulesForProduct(productId, newConditions);
-        return ResponseEntity.ok().build();
-    }
-
-    /**
+     /**
      * Удаляет набор правил по его ID.
      *
      * @param ruleId ID набора правил.
@@ -136,7 +87,7 @@ public class RuleController {
     public ResponseEntity<Void> deleteRule(
             @Parameter(description = "ID набора правил", required = true)
             @PathVariable Long ruleId) {
-        //   ruleService.deleteRule(ruleId); ] /todo сделать реализацию этого метода в RuleServiceImpl
+           ruleService.deleteRuleSet(ruleId);
         return ResponseEntity.noContent().build();
     }
 }

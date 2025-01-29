@@ -3,6 +3,8 @@ package com.skypro.starbank.model.rules;
 import com.fasterxml.jackson.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,11 +13,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "rule_sets")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonPropertyOrder({"product_name","product_id","product_text","rules"})
+@JsonPropertyOrder({"id","product_name","product_id","product_text","rules"})
 @Schema(description = "RuleSet entity representing a product's rules")
 public class RuleSet {
 
-    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "Unique ID of the rule set", example = "1")
@@ -36,9 +37,9 @@ public class RuleSet {
     @JsonProperty("product_text")
     private String productText;
 
-    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "rule_set_id")
+    @OneToMany(mappedBy = "ruleSet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonProperty("rules")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Rule> rules;
 
     public RuleSet() {}

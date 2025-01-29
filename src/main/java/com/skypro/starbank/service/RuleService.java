@@ -29,10 +29,10 @@ public interface RuleService {
     /**
      * Обновление условий правил для конкретного продукта.
      *
-     * @param productId     UUID продукта.
+     * @param productId     Id продукта.
      * @param newConditions Новый список условий.
      */
-    void updateRulesForProduct(String productId, RuleSet newConditions);
+    void updateRulesForProduct(Long productId, RuleSet newConditions);
 
 
     /**
@@ -43,5 +43,5 @@ public interface RuleService {
      */
     boolean checkRulesForUser(String userId, RuleSet ruleSet);
 
-    void deleteRuleSet(UUID id);
+    void deleteRuleSet(Long id);
 }
