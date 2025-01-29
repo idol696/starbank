@@ -36,6 +36,7 @@ class RuleServiceTest {
     private UUID testProductId2;
     private UUID testProductId3;
     private UUID testProductId4;
+    private UUID testProductId5;
     private UUID testUserId;
 
     @BeforeEach
@@ -44,22 +45,27 @@ class RuleServiceTest {
         testProductId2 = UUID.randomUUID();
         testProductId3 = UUID.randomUUID();
         testProductId4 = UUID.randomUUID();
+        testProductId5 = UUID.randomUUID();
         testUserId = UUID.fromString("f37ba8a8-3cd5-4976-9f74-2b21f105da67");
         List<Rule> rulesList = List.of(new Rule(RuleQueryType.USER_OF,List.of("DEBIT"),false));
         List<Rule> rulesList2 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE,List.of("DEBIT", "DEPOSIT", ">", "1000"),false));
         List<Rule> rulesList3 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE,List.of("INVEST", "EXPENSE", ">", "1000"),false));
         List<Rule> rulesList4 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW,List.of("DEBIT", ">"),false));
+        List<Rule> rulesList5 = List.of(new Rule(RuleQueryType.ACTIVE_USER_OF,List.of("DEBIT"),false));
+
 
         RuleSet ruleSet1 = new RuleSet(testProductId1, "Test1", "Desc1", rulesList);
         RuleSet ruleSet2 = new RuleSet(testProductId2, "Test2", "Desc2", rulesList2);
         RuleSet ruleSet3 = new RuleSet(testProductId3, "Test3", "Desc3", rulesList3);
         RuleSet ruleSet4 = new RuleSet(testProductId4, "Test4", "Desc4", rulesList4);
+        RuleSet ruleSet5 = new RuleSet(testProductId4, "Test5", "Desc5", rulesList5);
 
         when(ruleSetRepository.findAll()).thenReturn(List.of(ruleSet1, ruleSet2));
         when(ruleSetRepository.findByProductId(testProductId1)).thenReturn(Optional.of(ruleSet1));
         when(ruleSetRepository.findByProductId(testProductId2)).thenReturn(Optional.of(ruleSet2));
         when(ruleSetRepository.findByProductId(testProductId3)).thenReturn(Optional.of(ruleSet3));
         when(ruleSetRepository.findByProductId(testProductId4)).thenReturn(Optional.of(ruleSet4));
+        when(ruleSetRepository.findByProductId(testProductId5)).thenReturn(Optional.of(ruleSet5));
      }
 
     @Test
@@ -146,6 +152,19 @@ class RuleServiceTest {
         verify(transactionRepository, times(1)).userHasProduct(testUserId.toString(), "DEBIT");
         verify(transactionRepository, times(1)).getTotalDeposits(testUserId.toString(), "DEBIT");
         verify(transactionRepository, times(1)).getTotalExpenses(testUserId.toString(), "DEBIT");
+    }
+
+    @Test
+    void shouldCorrectlyActiveUserEvaluateCondition() {
+        when(transactionRepository.userHasProductCount(testUserId.toString(), "DEBIT")).thenReturn(5);
+
+        RuleSet ruleSet = ruleService.getRulesByProductId(testProductId5.toString());
+        System.out.println(ruleSet);
+        assertNotNull(ruleSet);
+        boolean result = ruleService.checkRulesForUser(testUserId.toString(), ruleSet);
+        assertTrue(result);
+
+         verify(transactionRepository, times(1)).userHasProductCount(testUserId.toString(), "DEBIT");
     }
 
 }
