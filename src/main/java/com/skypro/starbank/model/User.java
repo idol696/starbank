@@ -1,27 +1,20 @@
 package com.skypro.starbank.model;
 
-import jakarta.persistence.Column;
-
 import java.util.Objects;
 
 public class User {
     private String id;
-    private String firstName;
-    private String lastName;
+    private String name;
 
-    public User(String id, String firstName, String lastName) {}
+    public User() {}
 
-    public User(String id, String firstName) {
+    public User(String id, String name) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.name = name;
     }
 
     public String getId() { return id; }
-    // Геттер для name, который объединяет first_name и last_name
-    public String getName() {
-        return firstName + " " + lastName;
-    }
+    public String getName() { return name; }
 
     @Override
     public boolean equals(Object o) {
@@ -36,4 +29,3 @@ public class User {
         return Objects.hash(getId(), getName());
     }
 }
-

@@ -18,31 +18,25 @@ public class TelegramRecommendationService {
     private RecommendationService recommendationService;
 
     public String getRecommendationByUsername(String username) {
-        Optional<User> optionalUser = userRepository.findUserByName(username);
-
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if(user.getId() == null) {
-                return "Пользователь не найден";
-            }
-            RecommendationResponse recommendations = recommendationService.getRecommendations(user.getId());
-
-            StringBuilder response = new StringBuilder();
-            response.append("Здравствуйте ").append(user.getName()).append("\n");
-            response.append("Новые продукты для вас:\n");
-            if (recommendations.getRecommendations().isEmpty()) {
-                response.append("На данный момент нет доступных рекомендаций.");
-            } else {
-                for (var recommendation : recommendations.getRecommendations()) {
-                    response.append("- ").append(recommendation.getName())
-                            .append(": ").append(recommendation.getText())
-                            .append("\n");
-                }
-            }
-            return response.toString();
-
-        } else {
+        User user = userRepository.findUserByName(username);
+        System.out.println(user);
+        if (user == null) {
             return "Пользователь не найден";
         }
+        RecommendationResponse recommendations = recommendationService.getRecommendations(user.getId());
+
+        StringBuilder response = new StringBuilder();
+        response.append("Здравствуйте ").append(user.getName()).append("\n");
+        response.append("Новые продукты для вас:\n");
+        if (recommendations.getRecommendations().isEmpty()) {
+            response.append("На данный момент нет доступных рекомендаций.");
+        } else {
+            for (var recommendation : recommendations.getRecommendations()) {
+                response.append("- ").append(recommendation.getName())
+                        .append(": ").append(recommendation.getText())
+                        .append("\n");
+            }
+        }
+        return response.toString();
     }
 }
