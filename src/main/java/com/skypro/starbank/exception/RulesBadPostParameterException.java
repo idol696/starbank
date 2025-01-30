@@ -3,9 +3,9 @@ package com.skypro.starbank.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class RulesNotFoundException extends RuntimeException {
-    public RulesNotFoundException(String message) {
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class RulesBadPostParameterException extends RuntimeException {
+    public RulesBadPostParameterException(String message) {
         super(message);
     }
 }

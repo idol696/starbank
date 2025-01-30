@@ -1,0 +1,38 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
+
+    <changeSet id="add-indexes-rule-sets" author="idol696">
+        <!-- Добавляем индекс на product_id -->
+        <createIndex indexName="idx_rule_sets_product_id" tableName="rule_sets">
+            <column name="product_id"/>
+        </createIndex>
+
+        <!-- Добавляем индекс на product_name -->
+        <createIndex indexName="idx_rule_sets_product_name" tableName="rule_sets">
+            <column name="product_name"/>
+        </createIndex>
+
+
+    </changeSet>
+
+    <changeSet id="add-foreign-key-rules" author="idol696">
+        <addForeignKeyConstraint
+                baseTableName="rules"
+                baseColumnNames="rule_set_id"
+                referencedTableName="rule_sets"
+                referencedColumnNames="id"
+                constraintName="fk_rules_rule_set"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="reset-sequence-rules" author="idol696">
+        <sql>
+            SELECT setval(pg_get_serial_sequence('rule_sets', 'id'), (SELECT MAX(id) FROM rules));
+            SELECT setval(pg_get_serial_sequence('rules', 'id'), (SELECT MAX(id) FROM rules));
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

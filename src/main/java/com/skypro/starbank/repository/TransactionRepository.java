@@ -45,6 +45,11 @@ public class TransactionRepository {
     }
 
     public boolean userHasProduct(String userId, String productType) {
+        int count = userHasProductCount(userId, productType);
+        return userHasProductCount(userId, productType)  > 0;
+    }
+
+    public int userHasProductCount(String userId, String productType) {
         String sql = """
                 SELECT COUNT(*) FROM TRANSACTIONS t
                 JOIN PRODUCTS p ON t.product_id = p.id
@@ -52,7 +57,7 @@ public class TransactionRepository {
                 """;
 
         Integer count = jdbcTemplate.queryForObject(sql, new Object[]{userId, productType}, Integer.class);
-        return count != null && count > 0;
+        return  count != null ? count : 0;
     }
 
     public double getTotalDeposits(String userId, String productType) {
@@ -69,7 +74,7 @@ public class TransactionRepository {
         String sql = """
                 SELECT COALESCE(SUM(t.amount), 0) FROM TRANSACTIONS t
                 JOIN PRODUCTS p ON t.product_id = p.id
-                WHERE t.user_id = ? AND p.type = ? AND t.type = 'EXPENSE'
+                WHERE t.user_id = ? AND p.type = ? AND t.type = 'WITHDRAW'
                 """;
 
         return jdbcTemplate.queryForObject(sql, new Object[]{userId, productType}, Double.class);

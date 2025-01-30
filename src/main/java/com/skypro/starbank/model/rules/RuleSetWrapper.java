@@ -1,22 +1,25 @@
 package com.skypro.starbank.model.rules;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class RuleSetWrapper {
-    private List<RuleSet> rules;
 
-    public List<RuleSet> getRules() {
-        return rules;
+    @JsonProperty("data") // Заворачиваем в "data"
+    private List<RuleSet> data;
+
+    public RuleSetWrapper(List<RuleSet> data) {
+        this.data = data;
     }
 
-    public void setRules(List<RuleSet> rules) {
-        this.rules = rules;
-    }
+    public List<RuleSet> getData() { return data; }
+
 
     @Override
     public String toString() {
         return "RuleSetWrapper{" +
-                "rules=" + rules +
+                "rules=" + data +
                 '}';
     }
 }
