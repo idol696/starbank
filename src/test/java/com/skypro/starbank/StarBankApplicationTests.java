@@ -15,19 +15,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StarBankApplicationTests {
 
 	@Autowired
-	private RuleService ruleService;
-
-	@Autowired
 	private RecommendationService recommendationService;
 
 	@Autowired
 	private RecommendationController recommendationController;
 
+	@Autowired
+	private RuleService ruleService;
+
 	@Test
 	void contextLoads() {
-		assertThat(ruleService).isNotNull();
 		assertThat(recommendationService).isNotNull();
 		assertThat(recommendationController).isNotNull();
+		assertThat(ruleService).isNotNull();
 	}
 }
 

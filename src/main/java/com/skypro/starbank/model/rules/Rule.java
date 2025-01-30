@@ -3,13 +3,10 @@ package com.skypro.starbank.model.rules;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skypro.starbank.exception.RulesArgumentIndexNotFoundException;
 import com.skypro.starbank.exception.RulesArgumentSerializationException;
 import jakarta.persistence.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,14 +22,12 @@ public class Rule {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_set_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private RuleSet ruleSet;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "query", nullable = false)
-    private RuleQueryType query;
+    private String query;
 
     @Column(name = "arguments", columnDefinition = "TEXT")
     private String argumentsJson;
@@ -45,7 +40,7 @@ public class Rule {
 
     public Rule() {}
 
-    public Rule(RuleQueryType query, List<String> arguments, boolean negate) {
+    public Rule(String query, List<String> arguments, boolean negate) {
         this.query = query;
         this.negate = negate;
         setArguments(arguments);
@@ -54,8 +49,8 @@ public class Rule {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public RuleQueryType getQuery() { return query; }
-    public void setQuery(RuleQueryType query) { this.query = query; }
+    public String getQuery() { return query; }
+    public void setQuery(String query) { this.query = query; }
 
     public boolean isNegate() { return negate; }
     public void setNegate(boolean negate) { this.negate = negate; }
@@ -69,7 +64,7 @@ public class Rule {
 
     public List<String> getArguments() {
         try {
-            return objectMapper.readValue(argumentsJson, new TypeReference<List<String>>() {});
+            return objectMapper.readValue(argumentsJson, List.class);
         } catch (JsonProcessingException e) {
             throw new RulesArgumentSerializationException("Ошибка десериализации arguments: " + argumentsJson);
         }
@@ -91,12 +86,15 @@ public class Rule {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Rule rule = (Rule) o;
-        return Objects.equals(id, rule.id);
+        return isNegate() == rule.isNegate() && Objects.equals(getId(), rule.getId()) && Objects.equals(getRuleSet(),
+                rule.getRuleSet()) && Objects.equals(getQuery(), rule.getQuery()) &&
+                Objects.equals(argumentsJson, rule.argumentsJson);
     }
 
-
     @Override
-    public int hashCode() { return Objects.hash(id); }
+    public int hashCode() {
+        return Objects.hash(getId(), getRuleSet(), getQuery(), argumentsJson, isNegate());
+    }
 
     @Override
     public String toString() {

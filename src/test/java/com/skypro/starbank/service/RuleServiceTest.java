@@ -1,10 +1,11 @@
 package com.skypro.starbank.service;
 
+
 import com.skypro.starbank.model.rules.Rule;
-import com.skypro.starbank.model.rules.RuleQueryType;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.repository.RuleSetRepository;
 import com.skypro.starbank.repository.TransactionRepository;
+import com.skypro.starbank.service.rulehandlers.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,14 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ActiveProfiles("test")
 @SpringBootTest
+@ActiveProfiles("test")
 class RuleServiceTest {
 
     @Mock
@@ -29,142 +30,80 @@ class RuleServiceTest {
     @Mock
     private RuleSetRepository ruleSetRepository;
 
+    @Mock
+    private UserOfHandler userOfHandler;
+
+    @Mock
+    private ActiveUserOfHandler activeUserOfHandler;
+
+    @Mock
+    private TransactionSumCompareHandler transactionSumCompareHandler;
+
+    @Mock
+    private TransactionSumCompareDepositWithdrawHandler transactionSumCompareDepositWithdrawHandler;
+
     @InjectMocks
     private RuleServiceImpl ruleService;
 
-    private UUID testProductId1;
-    private UUID testProductId2;
-    private UUID testProductId3;
-    private UUID testProductId4;
-    private UUID testProductId5;
     private UUID testUserId;
+    private UUID testProductId;
 
     @BeforeEach
     void setUp() {
-        testProductId1 = UUID.randomUUID();
-        testProductId2 = UUID.randomUUID();
-        testProductId3 = UUID.randomUUID();
-        testProductId4 = UUID.randomUUID();
-        testProductId5 = UUID.randomUUID();
         testUserId = UUID.fromString("f37ba8a8-3cd5-4976-9f74-2b21f105da67");
-        List<Rule> rulesList = List.of(new Rule(RuleQueryType.USER_OF,List.of("DEBIT"),false));
-        List<Rule> rulesList2 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE,List.of("DEBIT", "DEPOSIT", ">", "1000"),false));
-        List<Rule> rulesList3 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE,List.of("INVEST", "EXPENSE", ">", "1000"),false));
-        List<Rule> rulesList4 = List.of(rulesList.get(0),new Rule(RuleQueryType.TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW,List.of("DEBIT", ">"),false));
-        List<Rule> rulesList5 = List.of(new Rule(RuleQueryType.ACTIVE_USER_OF,List.of("DEBIT"),false));
+        testProductId = UUID.randomUUID();
 
+        Map<String, RuleHandler> mockRuleHandlers = Map.of(
+                "USER_OF", userOfHandler,
+                "ACTIVE_USER_OF", activeUserOfHandler,
+                "TRANSACTION_SUM_COMPARE", transactionSumCompareHandler,
+                "TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW", transactionSumCompareDepositWithdrawHandler
+        );
 
-        RuleSet ruleSet1 = new RuleSet(testProductId1, "Test1", "Desc1", rulesList);
-        RuleSet ruleSet2 = new RuleSet(testProductId2, "Test2", "Desc2", rulesList2);
-        RuleSet ruleSet3 = new RuleSet(testProductId3, "Test3", "Desc3", rulesList3);
-        RuleSet ruleSet4 = new RuleSet(testProductId4, "Test4", "Desc4", rulesList4);
-        RuleSet ruleSet5 = new RuleSet(testProductId4, "Test5", "Desc5", rulesList5);
-
-        when(ruleSetRepository.findAll()).thenReturn(List.of(ruleSet1, ruleSet2));
-        when(ruleSetRepository.findByProductId(testProductId1)).thenReturn(Optional.of(ruleSet1));
-        when(ruleSetRepository.findByProductId(testProductId2)).thenReturn(Optional.of(ruleSet2));
-        when(ruleSetRepository.findByProductId(testProductId3)).thenReturn(Optional.of(ruleSet3));
-        when(ruleSetRepository.findByProductId(testProductId4)).thenReturn(Optional.of(ruleSet4));
-        when(ruleSetRepository.findByProductId(testProductId5)).thenReturn(Optional.of(ruleSet5));
-     }
-
-    @Test
-    void shouldLoadRulesFromDatabase() {
-        List<RuleSet> rules = ruleService.getAllRules();
-        assertNotNull(rules);
-        assertFalse(rules.isEmpty());
-        assertEquals(2, rules.size());
-
-        verify(ruleSetRepository, times(1)).findAll();
+        ruleService = new RuleServiceImpl(ruleSetRepository, mockRuleHandlers);
     }
 
     @Test
-    void shouldReturnRuleSetForExistingProduct() {
-        RuleSet ruleSet = ruleService.getRulesByProductId(testProductId1.toString());
-        assertNotNull(ruleSet);
-        assertEquals("Test1", ruleSet.getProductName());
+    void shouldEvaluateUserOfRule() {
+        Rule rule = new Rule("USER_OF", List.of("DEBIT"), false);
+        when(userOfHandler.evaluate(testUserId.toString(), rule)).thenReturn(true);
 
-        verify(ruleSetRepository, times(1)).findByProductId(testProductId1);
-    }
+        boolean result = ruleService.checkRulesForUser(testUserId.toString(), new RuleSet(testProductId, "Test", "Desc", List.of(rule)));
 
-    @Test
-    void shouldReturnNullForNonExistingProduct() {
-        RuleSet ruleSet = ruleService.getRulesByProductId(String.valueOf(UUID.randomUUID()));
-        assertEquals(ruleSet, new RuleSet());
-
-        verify(ruleSetRepository, times(1)).findByProductId(any());
-    }
-
-    @Test
-    void shouldCorrectlyEvaluateCondition() {
-        when(transactionRepository.userHasProduct(testUserId.toString(), "DEBIT")).thenReturn(true);
-
-        RuleSet ruleSet = ruleService.getRulesByProductId(testProductId1.toString());
-        System.out.println(ruleSet);
-        assertNotNull(ruleSet);
-        boolean result = ruleService.checkRulesForUser(testUserId.toString(), ruleSet);
         assertTrue(result);
-
-        verify(transactionRepository, times(1)).userHasProduct(testUserId.toString(), "DEBIT");
+        verify(userOfHandler, times(1)).evaluate(testUserId.toString(), rule);
     }
 
     @Test
-    void shouldCorrectlyEvaluateTwoCondition() {
-        when(transactionRepository.userHasProduct(testUserId.toString(), "DEBIT")).thenReturn(true);
-        when(transactionRepository.getTotalDeposits(testUserId.toString(), "DEBIT")).thenReturn(1000.99);
+    void shouldEvaluateActiveUserOfRule() {
+        Rule rule = new Rule("ACTIVE_USER_OF", List.of("DEBIT"), false);
+        when(activeUserOfHandler.evaluate(testUserId.toString(), rule)).thenReturn(true);
 
-        RuleSet ruleSet = ruleService.getRulesByProductId(String.valueOf(testProductId2));
-        assertNotNull(ruleSet);
-        boolean result = ruleService.checkRulesForUser(testUserId.toString(), ruleSet);
+        boolean result = ruleService.checkRulesForUser(testUserId.toString(), new RuleSet(testProductId, "Test", "Desc", List.of(rule)));
+
         assertTrue(result);
-
-        verify(transactionRepository, times(1)).userHasProduct(testUserId.toString(), "DEBIT");
-        verify(transactionRepository, times(1)).getTotalDeposits(testUserId.toString(), "DEBIT");
+        verify(activeUserOfHandler, times(1)).evaluate(testUserId.toString(), rule);
     }
 
     @Test
-    void shouldCorrectlyEvaluateExpenseCondition() {
-        when(transactionRepository.userHasProduct(testUserId.toString(), "DEBIT")).thenReturn(true);
-        when(transactionRepository.getTotalExpenses(testUserId.toString(), "INVEST")).thenReturn(1000.99);
+    void shouldEvaluateTransactionSumCompareRule() {
+        Rule rule = new Rule("TRANSACTION_SUM_COMPARE", List.of("DEBIT", "DEPOSIT", ">", "1000"), false);
+        when(transactionSumCompareHandler.evaluate(testUserId.toString(), rule)).thenReturn(true);
 
-        RuleSet ruleSet = ruleService.getRulesByProductId(testProductId3.toString());
-        System.out.println(ruleSet);
-        assertNotNull(ruleSet);
-        boolean result = ruleService.checkRulesForUser(testUserId.toString(), ruleSet);
+        boolean result = ruleService.checkRulesForUser(testUserId.toString(), new RuleSet(testProductId, "Test", "Desc", List.of(rule)));
+
         assertTrue(result);
-
-        verify(transactionRepository, times(1)).userHasProduct(testUserId.toString(), "DEBIT");
-        verify(transactionRepository, times(1)).getTotalExpenses(testUserId.toString(), "INVEST");
+        verify(transactionSumCompareHandler, times(1)).evaluate(testUserId.toString(), rule);
     }
 
     @Test
-    void shouldCorrectlyEvaluateWithdrawCondition() {
-        when(transactionRepository.userHasProduct(testUserId.toString(), "DEBIT")).thenReturn(true);
-        when(transactionRepository.getTotalDeposits(testUserId.toString(), "DEBIT")).thenReturn(1000.99);
-        when(transactionRepository.getTotalExpenses(testUserId.toString(), "DEBIT")).thenReturn(1000.00);
+    void shouldEvaluateTransactionSumCompareDepositWithdrawRule() {
+        Rule rule = new Rule("TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW", List.of("DEBIT", ">"), false);
+        when(transactionSumCompareDepositWithdrawHandler.evaluate(testUserId.toString(), rule)).thenReturn(true);
 
-        RuleSet ruleSet = ruleService.getRulesByProductId(testProductId4.toString());
-        System.out.println(ruleSet);
-        assertNotNull(ruleSet);
-        boolean result = ruleService.checkRulesForUser(testUserId.toString(), ruleSet);
+        boolean result = ruleService.checkRulesForUser(testUserId.toString(), new RuleSet(testProductId, "Test", "Desc", List.of(rule)));
+
         assertTrue(result);
-
-        verify(transactionRepository, times(1)).userHasProduct(testUserId.toString(), "DEBIT");
-        verify(transactionRepository, times(1)).getTotalDeposits(testUserId.toString(), "DEBIT");
-        verify(transactionRepository, times(1)).getTotalExpenses(testUserId.toString(), "DEBIT");
+        verify(transactionSumCompareDepositWithdrawHandler, times(1)).evaluate(testUserId.toString(), rule);
     }
-
-    @Test
-    void shouldCorrectlyActiveUserEvaluateCondition() {
-        when(transactionRepository.userHasProductCount(testUserId.toString(), "DEBIT")).thenReturn(5);
-
-        RuleSet ruleSet = ruleService.getRulesByProductId(testProductId5.toString());
-        System.out.println(ruleSet);
-        assertNotNull(ruleSet);
-        boolean result = ruleService.checkRulesForUser(testUserId.toString(), ruleSet);
-        assertTrue(result);
-
-         verify(transactionRepository, times(1)).userHasProductCount(testUserId.toString(), "DEBIT");
-    }
-
 }

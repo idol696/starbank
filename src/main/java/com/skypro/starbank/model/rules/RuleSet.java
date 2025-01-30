@@ -3,8 +3,6 @@ package com.skypro.starbank.model.rules;
 import com.fasterxml.jackson.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +37,6 @@ public class RuleSet {
 
     @OneToMany(mappedBy = "ruleSet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonProperty("rules")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Rule> rules;
 
     public RuleSet() {}

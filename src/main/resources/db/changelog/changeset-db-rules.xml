@@ -9,7 +9,7 @@
 
         <!-- Создаём таблицу наборов правил (rule_sets) -->
         <createTable tableName="rule_sets">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="product_id" type="UUID">
@@ -23,10 +23,10 @@
 
         <!-- Создаём новую таблицу rules с BIGINT ID -->
         <createTable tableName="rules">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="rule_set_id" type="BIGINT">
+            <column name="rule_set_id" type="BIGSERIAL">
                 <constraints nullable="false" />
             </column>
             <column name="query" type="VARCHAR(255)">

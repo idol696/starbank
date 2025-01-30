@@ -32,6 +32,7 @@ class RecommendationServiceTest {
         reset(ruleService);
     }
 
+
     @Test
     void shouldReturnRecommendations_whenUserMatchesRules() {
         when(ruleService.getAllRules()).thenReturn(List.of(testRuleSet));

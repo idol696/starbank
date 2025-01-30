@@ -76,18 +76,19 @@ public class RuleController {
      * Удаляет набор правил по его ID.
      *
      * @param ruleId ID набора правил.
-     * @return {@link ResponseEntity} с HTTP статусом 204 No Content.
+     * @return {@link ResponseEntity} с HTTP статусом 200 Возвращает удаленный объект.
      */
     @DeleteMapping("/{ruleId}")
     @Operation(summary = "Удалить набор правил по ID.", description = "Удаляет набор правил с указанным ID.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Набор правил успешно удален"),
+            @ApiResponse(responseCode = "200", description = "Набор правил успешно удален",
+                    content = @Content(schema = @Schema(implementation = RuleSet.class))),
             @ApiResponse(responseCode = "404", description = "Набор правил с указанным ID не найден")
     })
-    public ResponseEntity<Void> deleteRule(
+    public ResponseEntity<RuleSet> deleteRule(
             @Parameter(description = "ID набора правил", required = true)
             @PathVariable Long ruleId) {
-           ruleService.deleteRuleSet(ruleId);
-        return ResponseEntity.noContent().build();
+           RuleSet ruleSet = ruleService.deleteRuleSet(ruleId);
+        return ResponseEntity.ok(ruleSet);
     }
 }

@@ -42,7 +42,8 @@ public class Recommendation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Recommendation that = (Recommendation) o;
-        return Objects.equals(getName(), that.getName()) && Objects.equals(getId(), that.getId()) && Objects.equals(getText(), that.getText());
+        return Objects.equals(getName(), that.getName()) && Objects.equals(getId(),
+                that.getId()) && Objects.equals(getText(), that.getText());
     }
 
     @Override
