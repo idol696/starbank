@@ -7,24 +7,22 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
 public class RecommendationBot extends TelegramLongPollingBot {
 
-    private final String botUsername;
-    private final String botToken;
     private final TelegramRecommendationService telegramRecommendationService;
 
     public RecommendationBot(
-            @Value("${telegram.bot.username}") String botUsername,
             @Value("${telegram.bot.token}") String botToken,
+            @Value("${telegram.bot.username}") String botUsername,
             TelegramRecommendationService telegramRecommendationService) {
-        this.botUsername = botUsername;
-        this.botToken = botToken;
+        super(botToken);
         this.telegramRecommendationService = telegramRecommendationService;
+        this.botUsername = botUsername;
     }
+
+    private final String botUsername;
 
     @Override
     public String getBotUsername() {
@@ -32,16 +30,10 @@ public class RecommendationBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public String getBotToken() {
-        return botToken;
-    }
-
-    @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-
 
             if ("/start".equals(messageText)) {
                 sendHelpMessage(chatId);
@@ -72,7 +64,7 @@ public class RecommendationBot extends TelegramLongPollingBot {
 
     private void sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage();
-        message.setChatId(chatId);
+        message.setChatId(String.valueOf(chatId));
         message.setText(text);
 
         try {
