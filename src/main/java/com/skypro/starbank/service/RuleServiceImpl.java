@@ -13,17 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class RuleServiceImpl implements RuleService {
-
-
     private static final Logger logger = LoggerFactory.getLogger(RuleServiceImpl.class);
-
     private final RuleSetRepository ruleSetRepository;
     private final Map<String, RuleHandler> ruleHandlers;
 
@@ -43,32 +39,22 @@ public class RuleServiceImpl implements RuleService {
         }
     }
 
-    /**
-     * Получение всех правил из базы
-     */
     @Override
     public List<RuleSet> getAllRules() {
         return List.copyOf(ruleSetRepository.findAll());
     }
 
-    /**
-     * Получение конкретного набора правил по ID
-     */
     @Override
     public RuleSet getRulesByProductId(UUID id) {
         return ruleSetRepository.findByProductId(id).orElse(new RuleSet());
     }
 
-    /**
-     * Создание нового набора правил
-     */
     @Override
     @Transactional
     public RuleSet setRules(RuleSet ruleSet) {
         if (ruleSet == null) {
             throw new RulesBadPostParameterException("EmptyJSON");
         }
-
         if (ruleSet.getRules() != null) {
             for (Rule rule : ruleSet.getRules()) {
                 rule.setRuleSet(ruleSet);
@@ -77,13 +63,9 @@ public class RuleServiceImpl implements RuleService {
             }
         }
         logger.info("Создан RuleSet: {}", ruleSet);
-
         return ruleSetRepository.save(ruleSet);
     }
 
-    /**
-     * Удаление набора правил по ID
-     */
     @Override
     @Transactional
     public RuleSet deleteRuleSet(Long id) {
@@ -93,10 +75,8 @@ public class RuleServiceImpl implements RuleService {
         return ruleSet;
     }
 
-    /**
-     * Проверка выполнения правил для пользователя
-     */
     @Override
+    @Transactional
     public boolean checkRulesForUser(String userId, RuleSet ruleSet) {
         logger.debug("🔍 Проверка правил для пользователя {} по продукту {}", userId, ruleSet.getProductId());
         boolean result = ruleSet.getRules().stream()
@@ -111,22 +91,15 @@ public class RuleServiceImpl implements RuleService {
         return result;
     }
 
-    /**
-     * Выполнение отдельного правила
-     */
     private boolean evaluateRule(String userId, Rule rule) {
         RuleHandler handler = ruleHandlers.get(rule.getQuery());
         logger.debug("📌 Доступные обработчики: {}", ruleHandlers.keySet());
-
         logger.debug("🔎 Проверка условия: {} для пользователя {} (Аргументы: {})",
                 rule.getQuery(), userId, rule.getArguments());
-
         if (handler == null) {
             logger.warn("⚠ Неизвестное правило: {}", rule.getQuery());
             return false;
         }
-
-
         return handler.evaluate(userId, rule);
     }
 }
