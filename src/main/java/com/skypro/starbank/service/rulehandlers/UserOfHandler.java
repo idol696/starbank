@@ -5,7 +5,7 @@ import com.skypro.starbank.repository.TransactionRepository;
 import org.springframework.stereotype.Component;
 
 @Component("USER_OF")
-public class UserOfHandler extends MasterHandler {
+public class UserOfHandler extends RuleMasterHandler {
 
     public UserOfHandler(TransactionRepository transactionRepository) {
         super(transactionRepository);

@@ -2,11 +2,10 @@ package com.skypro.starbank.service.rulehandlers;
 
 import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.repository.TransactionRepository;
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 @Component("ACTIVE_USER_OF")
-public class ActiveUserOfHandler extends MasterHandler {
+public class ActiveUserOfHandler extends RuleMasterHandler {
 
     public ActiveUserOfHandler(TransactionRepository transactionRepository) {
         super(transactionRepository);

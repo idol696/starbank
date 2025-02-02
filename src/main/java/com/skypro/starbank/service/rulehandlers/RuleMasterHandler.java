@@ -5,12 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
-public abstract class MasterHandler implements RuleHandler {
+public abstract class RuleMasterHandler implements RuleHandler {
 
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected final TransactionRepository transactionRepository;
 
-    public MasterHandler(TransactionRepository transactionRepository) {
+    public RuleMasterHandler(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
     }
 
@@ -28,7 +28,6 @@ public abstract class MasterHandler implements RuleHandler {
         return result;
     }
 
-    @Cacheable(value = "rules", key = "#productId")
     protected double getTotalAmount(String userId, String productType, String transactionType) {
         double total = transactionType.equals("DEPOSIT")
                 ? transactionRepository.getTotalDeposits(userId, productType)
@@ -37,7 +36,6 @@ public abstract class MasterHandler implements RuleHandler {
         return total;
     }
 
-    @Cacheable(value = "rules", key = "#productId")
     protected int hasProductCount(String userId, String productType) {
         return transactionRepository.userHasProductCount(userId, productType);
     }
