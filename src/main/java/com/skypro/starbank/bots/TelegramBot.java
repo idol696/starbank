@@ -89,7 +89,7 @@ public class TelegramBot extends TelegramLongPollingBot  {
             long chatId = update.getMessage().getChatId();
 
             String command = messageText.split(" ")[0].substring(1);
-            //logger.debug("Получена команда {} для пользователя {}", command, chatId);
+            logger.debug("Получена команда {} для пользователя {}", command, chatId);
             try {
                 handlers.getOrDefault(command, handlers.get("help")).handleMessage(chatId, messageText);
             } catch (TelegramApiException e) {
