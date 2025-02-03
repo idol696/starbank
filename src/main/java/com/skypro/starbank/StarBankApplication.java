@@ -1,6 +1,6 @@
 package com.skypro.starbank;
 
-import com.skypro.starbank.bot.RecommendationBot;
+import com.skypro.starbank.bots.TelegramBot;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -17,7 +17,7 @@ public class StarBankApplication {
         ApplicationContext context = SpringApplication.run(StarBankApplication.class, args);
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            RecommendationBot bot = context.getBean(RecommendationBot.class);
+            TelegramBot bot = context.getBean(TelegramBot.class);
             botsApi.registerBot(bot);
         } catch (TelegramApiException e) {
             e.printStackTrace();

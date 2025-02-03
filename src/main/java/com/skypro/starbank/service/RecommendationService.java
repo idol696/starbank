@@ -9,5 +9,6 @@ public interface RecommendationService {
      * @return Объект с рекомендациями.
      */
     RecommendationResponse getRecommendations(String userId);
+    RecommendationResponse getRecommendationsByUserName(String username);
 }
 

@@ -2,6 +2,7 @@ package com.skypro.starbank.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -22,6 +23,7 @@ public class RecommendationResponse {
     @Schema(description = "Список рекомендаций для пользователя")
     private List<Recommendation> recommendations;
 
+    public RecommendationResponse() {}
 
     /**
      * Конструктор для создания ответа с рекомендациями.
@@ -33,6 +35,12 @@ public class RecommendationResponse {
         this.recommendations = recommendations;
     }
 
+    /**
+     * @return Возвращает пустое защищенное значение.
+     */
+    public static RecommendationResponse empty() {
+        return new RecommendationResponse(null, List.of());
+    }
 
     /**
      * Возвращает уникальный идентификатор пользователя.

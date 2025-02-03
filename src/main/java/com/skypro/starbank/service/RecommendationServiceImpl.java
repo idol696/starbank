@@ -1,12 +1,17 @@
 package com.skypro.starbank.service;
 
+import com.skypro.starbank.exception.UserNotFoundException;
 import com.skypro.starbank.model.Recommendation;
 import com.skypro.starbank.model.RecommendationResponse;
+import com.skypro.starbank.model.User;
 import com.skypro.starbank.model.rules.RuleSet;
+import com.skypro.starbank.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,9 +19,11 @@ import java.util.stream.Collectors;
 public class RecommendationServiceImpl implements RecommendationService {
     private static final Logger logger = LoggerFactory.getLogger(RecommendationServiceImpl.class);
     private final RuleService ruleService;
+    private final UserRepository userRepository;
 
-    public RecommendationServiceImpl(RuleService ruleService) {
+    public RecommendationServiceImpl(RuleService ruleService, UserRepository userRepository) {
         this.ruleService = ruleService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -38,9 +45,19 @@ public class RecommendationServiceImpl implements RecommendationService {
                             ruleSet.getProductId().toString(),
                             ruleSet.getProductText());
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         logger.info("🔹 Пользователь {} получил {} рекомендаций.", userId, recommendations.size());
         return new RecommendationResponse(userId, recommendations);
+    }
+
+    @Override
+    public RecommendationResponse getRecommendationsByUserName(String username) {
+        User user = userRepository.findUserByName(username);
+        logger.debug("Результат поиска пользователя: {}", user);
+        if (user == null) {
+            throw new UserNotFoundException();
+        }
+        return getRecommendations(user.getId());
     }
 }

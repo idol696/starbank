@@ -5,7 +5,7 @@ import com.skypro.starbank.repository.TransactionRepository;
 import org.springframework.stereotype.Component;
 
 @Component("TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW")
-public class TransactionSumCompareDepositWithdrawHandler extends MasterHandler {
+public class TransactionSumCompareDepositWithdrawHandler extends RuleMasterHandler {
 
      public TransactionSumCompareDepositWithdrawHandler(TransactionRepository transactionRepository) {
         super(transactionRepository);

@@ -10,6 +10,8 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +70,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     @Transactional
-    public RuleSet deleteRuleSet(Long id) {
+        public RuleSet deleteRuleSet(Long id) {
         RuleSet ruleSet = ruleSetRepository.findById(id)
                 .orElseThrow(() -> new RulesNotFoundException("Набор правил с ID " + id + " не найден"));
         ruleSetRepository.delete(ruleSet);
@@ -77,6 +79,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     @Transactional
+    @Cacheable(value = "rulesCheck", key = "#userId + '-' + #ruleSet.productId")
     public boolean checkRulesForUser(String userId, RuleSet ruleSet) {
         logger.debug("🔍 Проверка правил для пользователя {} по продукту {}", userId, ruleSet.getProductId());
         boolean result = ruleSet.getRules().stream()
