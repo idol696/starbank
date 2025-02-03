@@ -31,7 +31,6 @@ public class TelegramBot extends TelegramLongPollingBot  {
     private static final Logger logger = LoggerFactory.getLogger(TelegramBot.class);
     private final String botUsername;
 
-
     /**
      * Конструктор класса TelegramBot.
      *
@@ -46,7 +45,6 @@ public class TelegramBot extends TelegramLongPollingBot  {
         this.botUsername = botUsername;
         this.handlers = handlers;
     }
-
 
     /**
      * Возвращает имя пользователя бота.
