@@ -70,8 +70,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "rulesCheck", key = "#userId + '-' + #ruleSet.productId")
-    public RuleSet deleteRuleSet(Long id) {
+        public RuleSet deleteRuleSet(Long id) {
         RuleSet ruleSet = ruleSetRepository.findById(id)
                 .orElseThrow(() -> new RulesNotFoundException("Набор правил с ID " + id + " не найден"));
         ruleSetRepository.delete(ruleSet);
