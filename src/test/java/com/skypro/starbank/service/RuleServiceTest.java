@@ -4,6 +4,7 @@ package com.skypro.starbank.service;
 import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.repository.RuleSetRepository;
+import com.skypro.starbank.repository.RuleStatRepository;
 import com.skypro.starbank.repository.TransactionRepository;
 import com.skypro.starbank.service.rulehandlers.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,9 @@ class RuleServiceTest {
 
     @Mock
     private RuleSetRepository ruleSetRepository;
+
+    @Mock
+    private RuleStatRepository ruleStatRepository;
 
     @Mock
     private UserOfHandler userOfHandler;
@@ -60,7 +64,7 @@ class RuleServiceTest {
                 "TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW", transactionSumCompareDepositWithdrawHandler
         );
 
-        ruleService = new RuleServiceImpl(ruleSetRepository, mockRuleHandlers);
+        ruleService = new RuleServiceImpl(ruleSetRepository, ruleStatRepository, mockRuleHandlers);
     }
 
     @Test

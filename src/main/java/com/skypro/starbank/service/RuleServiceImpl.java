@@ -2,33 +2,37 @@ package com.skypro.starbank.service;
 
 import com.skypro.starbank.exception.RulesBadPostParameterException;
 import com.skypro.starbank.exception.RulesNotFoundException;
+import com.skypro.starbank.model.RuleStat;
 import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.repository.RuleSetRepository;
+import com.skypro.starbank.repository.RuleStatRepository;
 import com.skypro.starbank.service.rulehandlers.RuleHandler;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class RuleServiceImpl implements RuleService {
     private static final Logger logger = LoggerFactory.getLogger(RuleServiceImpl.class);
     private final RuleSetRepository ruleSetRepository;
+    private final RuleStatRepository ruleStatRepository;
     private final Map<String, RuleHandler> ruleHandlers;
 
     @Autowired
-    public RuleServiceImpl(RuleSetRepository ruleSetRepository,
+    public RuleServiceImpl(RuleSetRepository ruleSetRepository, RuleStatRepository ruleStatRepository,
                            @Lazy Map<String, RuleHandler> ruleHandlers) {
         this.ruleSetRepository = ruleSetRepository;
+        this.ruleStatRepository = ruleStatRepository;
         this.ruleHandlers = ruleHandlers;
     }
 
@@ -104,5 +108,25 @@ public class RuleServiceImpl implements RuleService {
             return false;
         }
         return handler.evaluate(userId, rule);
+    }
+
+
+    @Override
+    @Transactional
+    public void incrementRuleStat(Long ruleId) {
+        Optional<RuleStat> statOpt = ruleStatRepository.findByRuleId(ruleId);
+        RuleStat stat = statOpt.orElseGet(() -> new RuleStat(ruleId, 0));
+        stat.increment();
+        ruleStatRepository.save(stat);
+    }
+
+    @Transactional
+    public void deleteRuleStat(Long ruleId) {
+        ruleStatRepository.deleteByRuleId(ruleId);
+    }
+
+    @Override
+    public List<RuleStat> getRuleStats() {
+        return ruleStatRepository.findAll();
     }
 }

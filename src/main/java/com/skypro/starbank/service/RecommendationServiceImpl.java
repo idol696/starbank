@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
@@ -27,19 +25,19 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public RecommendationResponse getRecommendations(String userId) {
         if (userId == null) {
             logger.error("Пользователь не найден, userId равно null");
             return new RecommendationResponse(null, List.of());
         }
-
         logger.debug("Получение рекомендаций для пользователя с ID: {}", userId);
         List<RuleSet> allRules = ruleService.getAllRules();
         List<Recommendation> recommendations = allRules.stream()
                 .filter(ruleSet -> ruleService.checkRulesForUser(userId, ruleSet))
                 .map(ruleSet -> {
                     logger.debug("Рекомендация для продукта {}: {}", ruleSet.getProductId(), ruleSet.getProductName());
+                    ruleService.incrementRuleStat(ruleSet.getId());
                     return new Recommendation(
                             ruleSet.getProductName(),
                             ruleSet.getProductId().toString(),

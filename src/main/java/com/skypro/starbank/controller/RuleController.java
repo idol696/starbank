@@ -1,5 +1,6 @@
 package com.skypro.starbank.controller;
 
+import com.skypro.starbank.model.RuleStat;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.model.rules.RuleSetWrapper;
 import com.skypro.starbank.service.RuleService;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Контроллер для управления наборами правил (RuleSet).
@@ -90,5 +92,20 @@ public class RuleController {
             @PathVariable Long ruleId) {
            RuleSet ruleSet = ruleService.deleteRuleSet(ruleId);
         return ResponseEntity.ok(ruleSet);
+    }
+
+    /**
+     * Возвращает статистику срабатываний всех правил рекомендаций.
+     * Если правило никогда не срабатывало, оно будет присутствовать в списке со значением счетчика 0.
+     *
+     * @return ответ со статистикой срабатываний всех правил
+     */
+    @GetMapping("/stats")
+    @Operation(summary = "Получить статистику срабатывания правил", description = "Возвращает статистику срабатывания всех правил рекомендаций")
+    @ApiResponse(responseCode = "200", description = "Статистика успешно получена",
+            content = @Content(schema = @Schema(implementation = RuleStat.class)))
+    public Map<String,List<RuleStat>> getRuleStats() {
+        List<RuleStat> stats = ruleService.getRuleStats();
+        return Map.of("stats", stats);
     }
 }
