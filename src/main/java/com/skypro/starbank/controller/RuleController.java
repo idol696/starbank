@@ -74,7 +74,7 @@ public class RuleController {
         return ResponseEntity.ok(new RuleSetWrapper(rules));
     }
 
-     /**
+    /**
      * Удаляет набор правил по его ID.
      *
      * @param ruleId ID набора правил.
@@ -90,7 +90,7 @@ public class RuleController {
     public ResponseEntity<RuleSet> deleteRule(
             @Parameter(description = "ID набора правил", required = true)
             @PathVariable Long ruleId) {
-           RuleSet ruleSet = ruleService.deleteRuleSet(ruleId);
+        RuleSet ruleSet = ruleService.deleteRuleSet(ruleId);
         return ResponseEntity.ok(ruleSet);
     }
 
@@ -103,9 +103,22 @@ public class RuleController {
     @GetMapping("/stats")
     @Operation(summary = "Получить статистику срабатывания правил", description = "Возвращает статистику срабатывания всех правил рекомендаций")
     @ApiResponse(responseCode = "200", description = "Статистика успешно получена",
-            content = @Content(schema = @Schema(implementation = RuleStat.class)))
-    public Map<String,List<RuleStat>> getRuleStats() {
+            content = @Content(schema = @Schema(implementation = RuleStatsResponse.class)))
+    public Map<String, List<RuleStat>> getRuleStats() {
         List<RuleStat> stats = ruleService.getRuleStats();
         return Map.of("stats", stats);
     }
+
+    /**
+         * Внутренний класс для представления ответа со статистикой срабатывания правил.
+         */
+        @Schema(description = "Ответ с статистикой срабатывания правил")
+        public record RuleStatsResponse(
+            @Schema(description = "Статистика правил", example = "[{\"rule_id\": 1, \"count\": 5}]") List<RuleStat> stats) {
+
+            public RuleStatsResponse(List<RuleStat> stats) {
+                this.stats = stats;
+            }
+        }
 }
+

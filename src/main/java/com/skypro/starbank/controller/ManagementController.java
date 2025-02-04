@@ -55,8 +55,19 @@ public class ManagementController {
     @GetMapping("/info")
     @Operation(summary = "Получить информацию о сервисе", description = "Возвращает название и версию сервиса")
     @ApiResponse(responseCode = "200", description = "Информация о сервисе успешно получена",
-            content = @Content(schema = @Schema(implementation = Map.class)))
+            content = @Content(schema = @Schema(implementation = ServiceInfoResponse.class)))
     public ResponseEntity<Map<String,String>> getServiceInfo() {
         return ResponseEntity.ok(managementService.getServiceInfo());
     }
+
+    /**
+     * Внутренний класс для представления информации о сервисе.
+     */
+        @Schema(description = "Ответ с информацией о сервисе")
+        public record ServiceInfoResponse(String name, String version) {
+            public ServiceInfoResponse(String name, String version) {
+                this.name = "Application";
+                this.version = "0.1";
+            }
+        }
 }

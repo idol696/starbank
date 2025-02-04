@@ -33,4 +33,15 @@ public class SwaggerConfig {
                 .pathsToMatch("/recommendation/**")
                 .build();
     }
+    
+    /**
+     * Группировка для Management Controller.
+     */
+    @Bean
+    public GroupedOpenApi managementApi() {
+        return GroupedOpenApi.builder()
+                .group("Management Controller")
+                .pathsToMatch("/management/**")
+                .build();
+    }
 }
