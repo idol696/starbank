@@ -1,6 +1,7 @@
 package com.skypro.starbank.service;
 
 
+import com.skypro.starbank.model.RuleStat;
 import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.repository.RuleSetRepository;
@@ -16,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -109,5 +111,49 @@ class RuleServiceTest {
 
         assertTrue(result);
         verify(transactionSumCompareDepositWithdrawHandler, times(1)).evaluate(testUserId.toString(), rule);
+    }
+
+    @Test
+    void shouldIncrementRuleStat() {
+        Long ruleId = 1L;
+        RuleStat existingStat = new RuleStat(ruleId, 5);
+
+        when(ruleStatRepository.findByRuleId(ruleId)).thenReturn(Optional.of(existingStat));
+
+        ruleService.incrementRuleStat(ruleId);
+
+        verify(ruleStatRepository, times(1)).save(existingStat);
+        assertEquals(6, existingStat.getCount(), "Статистика должна быть инкрементирована на 1");
+    }
+
+    @Test
+    void shouldCreateAndIncrementRuleStatIfNotExists() {
+        Long ruleId = 2L;
+        when(ruleStatRepository.findByRuleId(ruleId)).thenReturn(Optional.empty());
+
+        ruleService.incrementRuleStat(ruleId);
+
+        verify(ruleStatRepository, times(1)).save(any(RuleStat.class));
+    }
+
+    @Test
+    void shouldDeleteRuleStat() {
+        Long ruleId = 3L;
+
+        ruleService.deleteRuleStat(ruleId);
+
+        verify(ruleStatRepository, times(1)).deleteByRuleId(ruleId);
+    }
+
+    @Test
+    void shouldGetAllRuleStats() {
+        List<RuleStat> stats = List.of(new RuleStat(1L, 5), new RuleStat(2L, 10));
+        when(ruleStatRepository.findAll()).thenReturn(stats);
+
+        List<RuleStat> result = ruleService.getRuleStats();
+
+        assertEquals(2, result.size(), "Должно быть два статистических правила");
+        assertEquals(5, result.get(0).getCount());
+        assertEquals(10, result.get(1).getCount());
     }
 }

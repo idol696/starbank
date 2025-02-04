@@ -20,7 +20,6 @@ import java.util.Map;
 /**
  * Контроллер для управления наборами правил (RuleSet).
  */
-
 @RestController
 @RequestMapping("/rule")
 @Tag(name = "Rule Controller", description = "API для управления наборами правил.")
@@ -110,15 +109,15 @@ public class RuleController {
     }
 
     /**
-         * Внутренний класс для представления ответа со статистикой срабатывания правил.
-         */
-        @Schema(description = "Ответ с статистикой срабатывания правил")
-        public record RuleStatsResponse(
+     * Внутренний класс для представления ответа со статистикой срабатывания правил.
+     */
+    @Schema(description = "Ответ с статистикой срабатывания правил")
+    public record RuleStatsResponse(
             @Schema(description = "Статистика правил", example = "[{\"rule_id\": 1, \"count\": 5}]") List<RuleStat> stats) {
 
-            public RuleStatsResponse(List<RuleStat> stats) {
-                this.stats = stats;
-            }
+        public RuleStatsResponse(List<RuleStat> stats) {
+            this.stats = stats;
         }
+    }
 }
 
