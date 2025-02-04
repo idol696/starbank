@@ -25,7 +25,7 @@ public class ManagementServiceImpl implements ManagementService {
     @Override
     public Map<String, String> getServiceInfo() {
         return Map.of(
-                "name", "StarBank Recommendation Service",
+                "name", buildProperties.getName(),
                 "version", buildProperties.getVersion()
         );
     }
