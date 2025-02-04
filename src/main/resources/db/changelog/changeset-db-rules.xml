@@ -1,0 +1,62 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
+
+    <changeSet id="create-rule-tables" author="idol696">
+
+
+        <!-- Создаём таблицу наборов правил (rule_sets) -->
+        <createTable tableName="rule_sets">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_text" type="TEXT"/>
+        </createTable>
+
+        <!-- Создаём новую таблицу rules с BIGINT ID -->
+        <createTable tableName="rules">
+            <column name="id" type="BIGSERIAL" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="rule_set_id" type="BIGSERIAL">
+                <constraints nullable="false" />
+            </column>
+            <column name="query" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arguments" type="TEXT"/>
+            <column name="negate" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+
+    </changeSet>
+
+    <changeSet id="create-rule-tables-2" author="idol696">
+        <createTable tableName="rule_stats">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="rule_id" type="BIGSERIAL">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="count" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_rule_stats_rule_id" tableName="rule_stats">
+            <column name="rule_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+
+

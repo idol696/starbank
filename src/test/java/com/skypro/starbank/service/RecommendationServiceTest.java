@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -23,13 +24,14 @@ class RecommendationServiceTest {
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
 
-    private final String testUserId = "user-123";
-    private final RuleSet testRuleSet = new RuleSet("product-1", "Invest 500", "Investment description", List.of());
+    private final String testUserId = "f37ba8a8-3cd5-4976-9f74-2b21f105da67";
+    private final RuleSet testRuleSet = new RuleSet(UUID.fromString(testUserId), "Invest 500", "Investment description", List.of());
 
     @BeforeEach
     void setUp() {
         reset(ruleService);
     }
+
 
     @Test
     void shouldReturnRecommendations_whenUserMatchesRules() {

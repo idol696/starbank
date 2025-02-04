@@ -1,0 +1,104 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
+
+    <changeSet id="insert-rule-sets" author="idol696">
+        <!-- Вставка данных в rule_sets -->
+        <insert tableName="rule_sets">
+            <column name="id" value="1"/>
+            <column name="product_id" value="147f6a0f-3b91-413b-ab99-87f081d60d5a"/>
+            <column name="product_name" value="Invest 500"/>
+            <column name="product_text" value="Откройте свой путь к успеху с индивидуальным инвестиционным счетом..."/>
+        </insert>
+        <insert tableName="rule_sets">
+            <column name="id" value="2"/>
+            <column name="product_id" value="59efc529-2fff-41af-baff-90ccd7402925"/>
+            <column name="product_name" value="Top Saving"/>
+            <column name="product_text" value="Откройте свою собственную «Копилку» с нашим банком!"/>
+        </insert>
+        <insert tableName="rule_sets">
+            <column name="id" value="3"/>
+            <column name="product_id" value="ab138afb-f3ba-4a93-b74f-0fcee86d447f"/>
+            <column name="product_name" value="Простой кредит"/>
+            <column name="product_text" value="Откройте мир выгодных кредитов с нами!"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-rules" author="idol696">
+        <!-- Вставка правил в rules -->
+        <insert tableName="rules">
+            <column name="id" value="1"/>
+            <column name="rule_set_id" value="1"/>
+            <column name="query" value="USER_OF"/>
+            <column name="arguments" value='["DEBIT"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+        <insert tableName="rules">
+            <column name="id" value="2"/>
+            <column name="rule_set_id" value="1"/>
+            <column name="query" value="USER_OF"/>
+            <column name="arguments" value='["INVEST"]'/>
+            <column name="negate" value="true"/>
+        </insert>
+        <insert tableName="rules">
+            <column name="id" value="3"/>
+            <column name="rule_set_id" value="1"/>
+            <column name="query" value="TRANSACTION_SUM_COMPARE"/>
+            <column name="arguments" value='["SAVING", "DEPOSIT", ">", "1000"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+
+        <insert tableName="rules">
+            <column name="id" value="4"/>
+            <column name="rule_set_id" value="2"/>
+            <column name="query" value="USER_OF"/>
+            <column name="arguments" value='["DEBIT"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+        <insert tableName="rules">
+            <column name="id" value="5"/>
+            <column name="rule_set_id" value="2"/>
+            <column name="query" value="TRANSACTION_SUM_COMPARE"/>
+            <column name="arguments" value='["DEBIT", "DEPOSIT", ">=", "50000"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+        <insert tableName="rules">
+            <column name="id" value="6"/>
+            <column name="rule_set_id" value="2"/>
+            <column name="query" value="TRANSACTION_SUM_COMPARE"/>
+            <column name="arguments" value='["SAVING", "DEPOSIT", ">=", "50000"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+        <insert tableName="rules">
+            <column name="id" value="7"/>
+            <column name="rule_set_id" value="2"/>
+            <column name="query" value="TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW"/>
+            <column name="arguments" value='["DEBIT", ">"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+
+        <insert tableName="rules">
+            <column name="id" value="8"/>
+            <column name="rule_set_id" value="3"/>
+            <column name="query" value="USER_OF"/>
+            <column name="arguments" value='["CREDIT"]'/>
+            <column name="negate" value="true"/>
+        </insert>
+        <insert tableName="rules">
+            <column name="id" value="9"/>
+            <column name="rule_set_id" value="3"/>
+            <column name="query" value="TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW"/>
+            <column name="arguments" value='["DEBIT", ">"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+        <insert tableName="rules">
+            <column name="id" value="10"/>
+            <column name="rule_set_id" value="3"/>
+            <column name="query" value="TRANSACTION_SUM_COMPARE"/>
+            <column name="arguments" value='["DEBIT", "EXPENSE", ">", "100000"]'/>
+            <column name="negate" value="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
