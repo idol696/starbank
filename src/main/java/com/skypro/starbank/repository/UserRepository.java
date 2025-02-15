@@ -25,9 +25,8 @@ public class UserRepository {
     }
 
     // Метод для поиска пользователя по имени
-    public User findUserByName(String username) {
+    public Optional<User> findUserByName(String username) {
         String sql = "SELECT * FROM USERS WHERE LOWER(username) = LOWER(?)";
-        System.out.println("'"+ username +"'");
         List<User> users = jdbcTemplate.query(sql, new Object[]{username},
                 (rs, rowNum) -> new User(
                         rs.getString("id"),  // если id - число
@@ -36,6 +35,7 @@ public class UserRepository {
         );
 
         logger.debug("Найденные пользователи: {}", users);
-        return users.isEmpty() ? null : users.get(0);
+        return users.stream().findFirst();
     }
+
 }

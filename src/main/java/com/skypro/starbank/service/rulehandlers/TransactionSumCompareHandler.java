@@ -4,7 +4,7 @@ import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.springframework.stereotype.Component;
 
-@Component("TRANSACTION_SUM_COMPARE")
+@Component
 public class TransactionSumCompareHandler extends RuleMasterHandler {
 
     public TransactionSumCompareHandler(TransactionRepository transactionRepository) {
@@ -22,6 +22,11 @@ public class TransactionSumCompareHandler extends RuleMasterHandler {
         boolean result = compare(total, operator, value);
         logger.debug("✅ TRANSACTION_SUM_COMPARE {} -> {} {} {} -> {}", productType, total, operator, value, result);
         return result;
+    }
+
+    @Override
+    public String getRuleKey() {
+        return "TRANSACTION_SUM_COMPARE";
     }
 }
 

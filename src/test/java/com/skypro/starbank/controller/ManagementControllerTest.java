@@ -1,6 +1,7 @@
 package com.skypro.starbank.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skypro.starbank.dto.ServiceInfoDTO;
 import com.skypro.starbank.service.ManagementServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -51,10 +50,7 @@ class ManagementControllerTest {
 
     @Test
     void shouldGetServiceInfoSuccessfully() throws Exception {
-        Map<String, String> serviceInfo = Map.of(
-                "name", "Application",
-                "version", "0.1"
-        );
+        ServiceInfoDTO serviceInfo = new ServiceInfoDTO("Application", "0.1");
         when(managementService.getServiceInfo()).thenReturn(serviceInfo);
 
         mockMvc.perform(get("/management/info")

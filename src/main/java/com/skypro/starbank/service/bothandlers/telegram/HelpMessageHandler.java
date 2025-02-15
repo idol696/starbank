@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-@Component("help")
+@Component
 public class HelpMessageHandler implements BotHandler {
     private final BotService botService;
     private static final Logger logger = LoggerFactory.getLogger(HelpMessageHandler.class);
@@ -28,5 +28,10 @@ public class HelpMessageHandler implements BotHandler {
     @Override
     public String getDescription() {
         return "Помощь";
+    }
+
+    @Override
+    public String getCommand() {
+        return "help";
     }
 }

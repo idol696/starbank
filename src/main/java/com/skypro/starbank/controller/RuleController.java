@@ -1,5 +1,6 @@
 package com.skypro.starbank.controller;
 
+import com.skypro.starbank.dto.RuleStatsResponseDTO;
 import com.skypro.starbank.model.RuleStat;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.model.rules.RuleSetWrapper;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Контроллер для управления наборами правил (RuleSet).
@@ -77,7 +77,7 @@ public class RuleController {
      * Удаляет набор правил по его ID.
      *
      * @param ruleId ID набора правил.
-     * @return {@link ResponseEntity} с HTTP статусом 200 Возвращает удаленный объект.
+     * @return {@link ResponseEntity} с HTTP статусом 200 возвращает удаленный объект.
      */
     @DeleteMapping("/{ruleId}")
     @Operation(summary = "Удалить набор правил по ID.", description = "Удаляет набор правил с указанным ID.")
@@ -97,15 +97,21 @@ public class RuleController {
      * Возвращает статистику срабатываний всех правил рекомендаций.
      * Если правило никогда не срабатывало, оно будет присутствовать в списке со значением счетчика 0.
      *
-     * @return ответ со статистикой срабатываний всех правил
+     * @return HTTP-ответ со статистикой правил.
      */
     @GetMapping("/stats")
-    @Operation(summary = "Получить статистику срабатывания правил", description = "Возвращает статистику срабатывания всех правил рекомендаций")
-    @ApiResponse(responseCode = "200", description = "Статистика успешно получена",
-            content = @Content(schema = @Schema(implementation = RuleStatsResponse.class)))
-    public Map<String, List<RuleStat>> getRuleStats() {
+    @Operation(
+            summary = "Получить статистику срабатывания правил",
+            description = "Возвращает детальную статистику всех правил рекомендаций, включая те, которые не срабатывали."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Статистика успешно получена",
+            content = @Content(schema = @Schema(implementation = RuleStatsResponseDTO.class))
+    )
+    public ResponseEntity<RuleStatsResponseDTO> getRuleStats() {
         List<RuleStat> stats = ruleService.getRuleStats();
-        return Map.of("stats", stats);
+        return ResponseEntity.ok(new RuleStatsResponseDTO(stats));
     }
 
     /**
@@ -113,8 +119,7 @@ public class RuleController {
      */
     @Schema(description = "Ответ с статистикой срабатывания правил")
     public record RuleStatsResponse(
-            @Schema(description = "Статистика правил", example = "[{\"rule_id\": 1, \"count\": 5}]") List<RuleStat> stats) {
-
+            @Schema(description = "Статистика правил") List<RuleStat> stats) {
         public RuleStatsResponse(List<RuleStat> stats) {
             this.stats = stats;
         }

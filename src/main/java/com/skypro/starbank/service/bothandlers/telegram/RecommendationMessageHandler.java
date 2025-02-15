@@ -1,5 +1,7 @@
 package com.skypro.starbank.service.bothandlers.telegram;
 
+import com.skypro.starbank.exception.UserIsNullException;
+import com.skypro.starbank.exception.UserNotFoundException;
 import com.skypro.starbank.service.BotService;
 import com.skypro.starbank.service.TelegramBotServiceImpl;
 import com.skypro.starbank.service.bothandlers.BotHandler;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component("recommend")
+@Component
 public class RecommendationMessageHandler implements BotHandler {
     private static final Logger logger = LoggerFactory.getLogger(RecommendationMessageHandler.class);
     private final BotService botService;
@@ -26,14 +28,24 @@ public class RecommendationMessageHandler implements BotHandler {
         List<String> arguments = botService.giveMessageArguments(messageText);
         logger.debug("с аргументами: {}", arguments);
         if (arguments.isEmpty()) {
-            botService.sendMessage(chatId,"Введите имя пользователя после команды" +
+            botService.sendMessage(chatId, "Введите имя пользователя после команды" +
                     " /recommend, например: /recommend Test User");
             return;
         }
-        String username = toUpperCase(arguments);
-        String recommendations = botService.getBotRecommendationByUsername(username);
+        String username = toUpperCase(arguments,true);
+        String recommendations = null;
+        try {
+            recommendations = botService.getBotRecommendationByUsername(username);
+        } catch (
+                UserNotFoundException e) {
+            logger.warn("Пользователь '{}' не найден!", username);
+            botService.sendMessage(chatId, "Пользователь " + toUpperCase(arguments,false) + " не найден!");
+        } catch (
+                UserIsNullException e) {
+            logger.error("Ошибка: передано пустое имя пользователя!");
+        }
 
-        botService.sendMessage(chatId,recommendations);
+        if (recommendations != null) botService.sendMessage(chatId, recommendations);
 
     }
 
@@ -42,9 +54,14 @@ public class RecommendationMessageHandler implements BotHandler {
         return "Получить рекомендацию (Укажи /recommend <username>)";
     }
 
-    private String toUpperCase(List<String> arguments) {
+    @Override
+    public String getCommand() {
+        return "recommend";
+    }
+
+    private String toUpperCase(List<String> arguments, boolean point) {
         return arguments.stream()
                 .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
-                .collect(Collectors.joining("."));
+                .collect(Collectors.joining(point ? "." : " "));
     }
 }

@@ -4,7 +4,7 @@ import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.springframework.stereotype.Component;
 
-@Component("USER_OF")
+@Component
 public class UserOfHandler extends RuleMasterHandler {
 
     public UserOfHandler(TransactionRepository transactionRepository) {
@@ -19,5 +19,10 @@ public class UserOfHandler extends RuleMasterHandler {
         boolean result = hasProduct(userId, productType) != rule.isNegate();
         logger.debug("✅ USER_OF {} -> {}", productType, result);
         return result;
+    }
+
+    @Override
+    public String getRuleKey() {
+        return "USER_OF";
     }
 }

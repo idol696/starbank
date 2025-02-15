@@ -1,5 +1,6 @@
 package com.skypro.starbank;
 
+import com.skypro.starbank.bots.TelegramBot;
 import com.skypro.starbank.controller.RecommendationController;
 import com.skypro.starbank.service.RecommendationService;
 import com.skypro.starbank.service.RuleService;
@@ -21,6 +22,9 @@ class StarBankApplicationTests {
 	private RecommendationController recommendationController;
 
 	@Autowired
+	private TelegramBot telegramBot;
+
+	@Autowired
 	private RuleService ruleService;
 
 	@Test
@@ -28,6 +32,7 @@ class StarBankApplicationTests {
 		assertThat(recommendationService).isNotNull();
 		assertThat(recommendationController).isNotNull();
 		assertThat(ruleService).isNotNull();
+		assertThat(telegramBot).isNotNull();
 	}
 }
 

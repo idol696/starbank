@@ -1,9 +1,9 @@
 package com.skypro.starbank.service;
 
+import com.skypro.starbank.exception.UserIsNullException;
 import com.skypro.starbank.exception.UserNotFoundException;
 import com.skypro.starbank.model.Recommendation;
 import com.skypro.starbank.model.RecommendationResponse;
-import com.skypro.starbank.model.User;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.repository.UserRepository;
 import org.slf4j.Logger;
@@ -29,14 +29,14 @@ public class RecommendationServiceImpl implements RecommendationService {
     public RecommendationResponse getRecommendations(String userId) {
         if (userId == null) {
             logger.error("Пользователь не найден, userId равно null");
-            return new RecommendationResponse(null, List.of());
+            throw new UserIsNullException();
         }
         logger.debug("Получение рекомендаций для пользователя с ID: {}", userId);
         List<RuleSet> allRules = ruleService.getAllRules();
         List<Recommendation> recommendations = allRules.stream()
                 .filter(ruleSet -> ruleService.checkRulesForUser(userId, ruleSet))
                 .map(ruleSet -> {
-                    logger.debug("Рекомендация для продукта {}: {}", ruleSet.getProductId(), ruleSet.getProductName());
+                    logger.info("Рекомендация для продукта {}: {}", ruleSet.getProductId(), ruleSet.getProductName());
                     ruleService.incrementRuleStat(ruleSet.getId());
                     return new Recommendation(
                             ruleSet.getProductName(),
@@ -51,11 +51,11 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     public RecommendationResponse getRecommendationsByUserName(String username) {
-        User user = userRepository.findUserByName(username);
-        logger.debug("Результат поиска пользователя: {}", user);
-        if (user == null) {
-            throw new UserNotFoundException();
-        }
-        return getRecommendations(user.getId());
+        return userRepository.findUserByName(username)
+                .map(user -> getRecommendations(user.getId()))
+                .orElseThrow(() -> {
+                    logger.warn("Пользователь {} не найден!", username);
+                    return new UserNotFoundException("Пользователь " + username + " не найден!");
+                });
     }
 }

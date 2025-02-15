@@ -1,8 +1,8 @@
 package com.skypro.starbank.service;
 
-import java.util.Map;
+import com.skypro.starbank.dto.ServiceInfoDTO;
 
 public interface ManagementService {
     void clearCaches();
-    Map<String, String> getServiceInfo();
+    ServiceInfoDTO getServiceInfo();
 }

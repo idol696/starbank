@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component("start")
+@Component
 public class StartMessageHandler implements BotHandler {
     private final BotService botService;
     private static final Logger logger = LoggerFactory.getLogger(StartMessageHandler.class);
@@ -25,5 +25,10 @@ public class StartMessageHandler implements BotHandler {
     @Override
     public String getDescription() {
         return "Стартовое сообщение";
+    }
+
+    @Override
+    public String getCommand() {
+        return "start";
     }
 }

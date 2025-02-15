@@ -4,7 +4,7 @@ import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.springframework.stereotype.Component;
 
-@Component("ACTIVE_USER_OF")
+@Component
 public class ActiveUserOfHandler extends RuleMasterHandler {
 
     public ActiveUserOfHandler(TransactionRepository transactionRepository) {
@@ -17,5 +17,10 @@ public class ActiveUserOfHandler extends RuleMasterHandler {
         boolean result = hasProductCount(userId, productType) >=5;
         logger.debug("✅ ACTIVE_USER_OF {} -> {}", productType, result);
         return result;
+    }
+
+    @Override
+    public String getRuleKey() {
+        return "ACTIVE_USER_OF";
     }
 }
