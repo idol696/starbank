@@ -39,6 +39,24 @@
 
     </changeSet>
 
+    <changeSet id="create-rule-tables-2" author="idol696">
+        <createTable tableName="rule_stats">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="rule_id" type="BIGSERIAL">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="count" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
 
+        <createIndex indexName="idx_rule_stats_rule_id" tableName="rule_stats">
+            <column name="rule_id"/>
+        </createIndex>
+    </changeSet>
 
 </databaseChangeLog>
+
+

@@ -1,5 +1,7 @@
 package com.skypro.starbank.controller;
 
+import com.skypro.starbank.dto.RuleStatsResponseDTO;
+import com.skypro.starbank.model.RuleStat;
 import com.skypro.starbank.model.rules.RuleSet;
 import com.skypro.starbank.model.rules.RuleSetWrapper;
 import com.skypro.starbank.service.RuleService;
@@ -18,7 +20,6 @@ import java.util.List;
 /**
  * Контроллер для управления наборами правил (RuleSet).
  */
-
 @RestController
 @RequestMapping("/rule")
 @Tag(name = "Rule Controller", description = "API для управления наборами правил.")
@@ -72,11 +73,11 @@ public class RuleController {
         return ResponseEntity.ok(new RuleSetWrapper(rules));
     }
 
-     /**
+    /**
      * Удаляет набор правил по его ID.
      *
      * @param ruleId ID набора правил.
-     * @return {@link ResponseEntity} с HTTP статусом 200 Возвращает удаленный объект.
+     * @return {@link ResponseEntity} с HTTP статусом 200 возвращает удаленный объект.
      */
     @DeleteMapping("/{ruleId}")
     @Operation(summary = "Удалить набор правил по ID.", description = "Удаляет набор правил с указанным ID.")
@@ -88,7 +89,40 @@ public class RuleController {
     public ResponseEntity<RuleSet> deleteRule(
             @Parameter(description = "ID набора правил", required = true)
             @PathVariable Long ruleId) {
-           RuleSet ruleSet = ruleService.deleteRuleSet(ruleId);
+        RuleSet ruleSet = ruleService.deleteRuleSet(ruleId);
         return ResponseEntity.ok(ruleSet);
     }
+
+    /**
+     * Возвращает статистику срабатываний всех правил рекомендаций.
+     * Если правило никогда не срабатывало, оно будет присутствовать в списке со значением счетчика 0.
+     *
+     * @return HTTP-ответ со статистикой правил.
+     */
+    @GetMapping("/stats")
+    @Operation(
+            summary = "Получить статистику срабатывания правил",
+            description = "Возвращает детальную статистику всех правил рекомендаций, включая те, которые не срабатывали."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Статистика успешно получена",
+            content = @Content(schema = @Schema(implementation = RuleStatsResponseDTO.class))
+    )
+    public ResponseEntity<RuleStatsResponseDTO> getRuleStats() {
+        List<RuleStat> stats = ruleService.getRuleStats();
+        return ResponseEntity.ok(new RuleStatsResponseDTO(stats));
+    }
+
+    /**
+     * Внутренний класс для представления ответа со статистикой срабатывания правил.
+     */
+    @Schema(description = "Ответ с статистикой срабатывания правил")
+    public record RuleStatsResponse(
+            @Schema(description = "Статистика правил") List<RuleStat> stats) {
+        public RuleStatsResponse(List<RuleStat> stats) {
+            this.stats = stats;
+        }
+    }
 }
+

@@ -4,8 +4,8 @@ import com.skypro.starbank.model.rules.Rule;
 import com.skypro.starbank.repository.TransactionRepository;
 import org.springframework.stereotype.Component;
 
-@Component("TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW")
-public class TransactionSumCompareDepositWithdrawHandler extends MasterHandler {
+@Component
+public class TransactionSumCompareDepositWithdrawHandler extends RuleMasterHandler {
 
      public TransactionSumCompareDepositWithdrawHandler(TransactionRepository transactionRepository) {
         super(transactionRepository);
@@ -22,5 +22,10 @@ public class TransactionSumCompareDepositWithdrawHandler extends MasterHandler {
         boolean result = compare(totalDeposits, operator, totalWithdrawals);
         logger.debug("✅ TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW {} -> {} {} {} -> {}", productType, totalDeposits, operator, totalWithdrawals, result);
         return result;
+    }
+
+    @Override
+    public String getRuleKey() {
+        return "TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW";
     }
 }
