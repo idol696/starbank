@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.skypro</groupId>
 	<artifactId>starbank</artifactId>
-	<version>0.7.1-PROTOTYPE</version>
+	<version>0.9.0-CANDIDATE</version>
 	<name>StarBank recommendation Service</name>
 	<description>StarBank Recommended Program for SkyPro School</description>
 	<url/>
