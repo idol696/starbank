@@ -1,6 +1,7 @@
 package com.skypro.starbank.service;
 
 import com.skypro.starbank.events.TelegramMessageEvent;
+import com.skypro.starbank.exception.UserNotFoundException;
 import com.skypro.starbank.model.RecommendationResponse;
 import com.skypro.starbank.model.Recommendation;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,15 +91,20 @@ class TelegramBotServiceTest {
     }
 
     @Test
-    void shouldReturnUserNotFoundMessage() {
+    void shouldThrowUserNotFoundException() {
         String username = "Test.User";
 
         when(recommendationService.getRecommendationsByUserName(username))
-                .thenReturn(null);
+                .thenThrow(new UserNotFoundException("Пользователь " + username + " не найден!"));
 
-        assertNull(telegramBotService.getBotRecommendationByUsername("Test.User"));
+        UserNotFoundException thrown = assertThrows(
+                UserNotFoundException.class,
+                () -> telegramBotService.getBotRecommendationByUsername(username)
+        );
 
-        verify(recommendationService, times(1)).getRecommendationsByUserName(username); // ✅ Проверяем вызов сервиса
+        assertEquals("Пользователь Test.User не найден!", thrown.getMessage());
+
+        verify(recommendationService, times(1)).getRecommendationsByUserName(username);
     }
 
     @Test
